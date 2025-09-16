@@ -579,17 +579,24 @@ bool cc_piece_is_figure( CcPieceTagType ptt ) {
 }
 
 bool cc_piece_is_one_step( CcPieceTagType piece, CcPieceTagType activator ) {
+    if ( CC_PIECE_IS_SINGLE_STEP_ALTERNATING( piece ) )
+        return true;
+
     CcPieceTagType ptt = CC_PIECE_IS_WAVE( piece ) ? activator : piece;
+
     return CC_PIECE_IS_SINGLE_STEP( ptt ) || CC_PIECE_IS_ONE_STEP( ptt );
 }
 
 bool cc_piece_is_two_step( CcPieceTagType piece, CcPieceTagType activator ) {
-    if ( CC_PIECE_IS_WAVE( piece ) ) {
-        return CC_WAVE_IS_TWO_STEP( activator );
-    } else {
-        return CC_PIECE_IS_TWO_STEP( piece ) ||
-               CC_PIECE_IS_SINGLE_STEP_ALTERNATING( piece );
-    }
+    bool is_wave = CC_PIECE_IS_WAVE( piece );
+
+    if ( is_wave && CC_PIECE_IS_SINGLE_STEP_ALTERNATING( activator ) )
+        return true;
+
+    CcPieceTagType ptt = is_wave ? activator : piece;
+
+    return CC_PIECE_IS_TWO_STEP( ptt ) ||
+           CC_PIECE_IS_SINGLE_STEP_ALTERNATING( ptt );
 }
 
 bool cc_piece_is_many_steps( CcPieceTagType piece ) {
