@@ -128,13 +128,13 @@
 //     return true;
 // }
 
-// bool cc_path_segment__new( CcSideEffect side_effect,
-//                            CcPosDesc moving_from,
-//                            CcTypedStep step_1,
-//                            CcTypedStep step_2,
-//                            CcPathContext * path_ctx__io,
-//                            CcPathLink ** path_link__o_a,
-//                            CcPathSideEffectLink ** side_effect_link__o_a ) {
+// bool cc_path_segment( CcSideEffect side_effect,
+//                       CcPosDesc moving_from,
+//                       CcTypedStep step_1,
+//                       CcTypedStep step_2,
+//                       CcPathContext * path_ctx__io,
+//                       CcPathLink ** path_link__o_a,
+//                       CcPathSideEffectLink ** side_effect_link__o_a ) {
 //     if ( !path_ctx__io ) return false;
 //     if ( !path_ctx__io->game__w ) return false;
 //     if ( !path_ctx__io->game__w->chessboard ) return false;
@@ -245,9 +245,12 @@ bool cc_path_side_effects( CcPosDesc moving_from,
                            CcPosDesc encounter,
                            CcPathContext * path_ctx__io,
                            CcPathLink ** path_link__io_a ) {
-    if ( !path_ctx__io ) return false;
     if ( !path_link__io_a ) return false;
     if ( !*path_link__io_a ) return false;
+    if ( !( (*path_link__io_a)->steps ) ) return false;
+
+    if ( !cc_path_context_is_legal( path_ctx__io, true, true ) ) return false;
+    if ( cc_path_link_node_is_leaf( *path_link__io_a ) != CC_MBE_True ) return false;
 
     CcChessboard * cb = path_ctx__io->cb_current;
     if ( !cb ) return false;
@@ -256,19 +259,24 @@ bool cc_path_side_effects( CcPosDesc moving_from,
     CcMultiStagePlyTypeEnum ms = path_ctx__io->move_ctx.multi_stage;
 
     if ( !CC_PIECE_IS_VALID( moving_from.piece ) ) return false;
-    if ( !CC_PIECE_IS_ENUMERATOR( encounter.piece ) ) return false;
+    if ( !CC_PIECE_IS_ENUMERATOR( encounter.piece ) ) return false; // Encountered piece == none, if en passant, for example.
 
     if ( !cc_activation_desc_is_valid( act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
     if ( !cc_chessboard_is_pos_on_board( cb, moving_from.pos.i, moving_from.pos.j ) ) return false;
     if ( !cc_chessboard_is_pos_on_board( cb, encounter.pos.i, encounter.pos.j ) ) return false;
 
+    CcStep * steps__t = NULL;
+
     //
     // Terminal side-effects.
 
     if ( cc_check_piece_can_capture( moving_from.piece, encounter.piece ) ) {
-        CcSideEffect se = cc_side_effect_capture( encounter.piece );
-
+        CcStep * step__w = cc_step_capture_append( &steps__t, CC_SLTE_Next, encounter.pos, encounter.piece );
+        if ( !step__w ) {
+            cc_step_free_all( &steps__t );
+            return false;
+        }
     }
 
     // TODO :: other terminating side-effects
@@ -329,35 +337,33 @@ bool cc_path_side_effects( CcPosDesc moving_from,
     // TODO :: other non-terminating side-effects
 
 
+    if ( steps__t ) {
+        CcStep * step__w = cc_step_extend( &( (*path_link__io_a)->steps ), &steps__t );
+        if ( !step__w ) {
+            cc_step_free_all( &steps__t );
+            return false;
+        }
+    }
 
     return true;
 }
 
-bool cc_path_segment__new( CcSideEffect side_effect,
-                           CcPosDesc moving_from,
-                           CcTypedStep step_1,
-                           CcTypedStep step_2,
-                           CcPathContext * path_ctx__io,
-                           CcPathLink ** path_link__o_a ) {
-    if ( !path_ctx__io ) return false;
-    if ( !path_ctx__io->game__w ) return false;
-    if ( !path_ctx__io->game__w->chessboard ) return false;
-    if ( !path_ctx__io->cb_current ) return false;
-
+bool cc_path_segment( CcSideEffect side_effect,
+                      CcPosDesc moving_from,
+                      CcTypedStep step_1,
+                      CcTypedStep step_2,
+                      CcPathContext * path_ctx__io,
+                      CcPathLink ** path_link__o_a ) {
     if ( !path_link__o_a ) return false;
     if ( *path_link__o_a ) return false;
 
-    if ( path_ctx__io->game__w->chessboard->type != path_ctx__io->cb_current->type ) return false;
-    if ( !CC_VARIANT_IS_VALID( path_ctx__io->cb_current->type ) ) return false;
-
-    cc_uint_t board_size = cc_variant_board_size( path_ctx__io->cb_current->type );
-    if ( !CC_IS_BOARD_SIZE_VALID( board_size ) ) return false;
-
     if ( !CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) return false;
-    if ( !cc_chessboard_is_pos_on_board( path_ctx__io->cb_current, moving_from.pos.i, moving_from.pos.j ) ) return false;
     if ( !cc_path_context_is_legal( path_ctx__io, true, true ) ) return false;
+
+    if ( !cc_chessboard_is_pos_on_board( path_ctx__io->cb_current, moving_from.pos.i, moving_from.pos.j ) ) return false;
     if ( !cc_activation_desc_is_valid( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
+    cc_uint_t board_size = cc_variant_board_size( path_ctx__io->cb_current->type );
     CcPos pos = moving_from.pos;
     CcStep * steps__t = cc_step_initial_no_side_effect__new( pos );
     if ( !steps__t ) return false;
@@ -398,24 +404,15 @@ bool cc_path_segment__new( CcSideEffect side_effect,
                     cc_step_free_all( &steps__t );
                     return false;
                 }
-            } else {
-                CcPosDesc encounter_pd = CC_POS_DESC_CAST( pos, encounter );
-
-                if ( !cc_path_side_effects( moving_from, step_1, step_2, encounter_pd, path_ctx__io, &pl__t ) ) {
-                    cc_path_link_free_all( &pl__t );
-                    cc_step_free_all( &steps__t );
-                    return false;
-                }
-
-                break; // [1]
-            }
+            } else
+                break;
         } else
             break;
 
         act_desc = ad;
     } while ( cc_activation_desc_is_usable( act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) );
 
-    pl__t->steps = steps__t; // Ownership transfer.
+    pl__t->steps = steps__t; // Ownership transfer, do not free( steps__t ).
     // steps__t = NULL; // Not needed, not used anymore.
 
     pl__t->encounter = encounter;
@@ -423,8 +420,15 @@ bool cc_path_segment__new( CcSideEffect side_effect,
 
     path_ctx__io->ply_ctx.act_desc = act_desc;
 
-    // if ( !CC_PIECE_IS_NONE( encounter ) )
-    //     break; // TODO :: side-effect --> fork | alt | sub
+    if ( !CC_PIECE_IS_NONE( encounter ) ) {
+        CcPosDesc encounter_pd = CC_POS_DESC_CAST( pos, encounter );
+
+        if ( !cc_path_side_effects( moving_from, step_1, step_2, encounter_pd, path_ctx__io, &pl__t ) ) {
+            cc_path_link_free_all( &pl__t );
+            // cc_step_free_all( &steps__t ); // Not needed, ownership already transferred.
+            return false;
+        }
+    }
 
     *path_link__o_a = pl__t; // Ownership transfer, do not free( pl__t ).
 

@@ -60,6 +60,12 @@ CcPathLink * cc_path_link_add_alter( CcPathLink ** pl_step__a,
 CcPathLink * cc_path_link_add_subs( CcPathLink ** pl_step__a,
                                     CcPathLink ** pl_sub__n );
 
+CcSideEffect * cc_path_link_node_last_step_side_effect( CcPathLink * pl_node );
+
+CcMaybeBoolEnum cc_path_link_node_last_step_side_effect_is_none( CcPathLink * pl_node );
+
+CcMaybeBoolEnum cc_path_link_node_is_leaf( CcPathLink * pl_node );
+
 // static bool _cc_path_link_steps_are_valid( CcStep * steps );
 
 // static bool _cc_path_link_is_valid( CcPathLink * path_link, bool has_steps );
