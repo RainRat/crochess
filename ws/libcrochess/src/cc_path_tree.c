@@ -31,7 +31,7 @@
 //     if ( !CC_PIECE_IS_VALID( moving_from.piece ) ) return false;
 //     if ( !CC_PIECE_IS_ENUMERATOR( encounter.piece ) ) return false;
 
-//     if ( !cc_activation_desc_is_valid( act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
+//     if ( !cc_activation_desc_is_legal( act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
 //     if ( !cc_chessboard_is_pos_on_board( cb, moving_from.pos.i, moving_from.pos.j ) ) return false;
 //     if ( !cc_chessboard_is_pos_on_board( cb, encounter.pos.i, encounter.pos.j ) ) return false;
@@ -155,7 +155,7 @@
 //     if ( !CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) return false;
 //     if ( !cc_chessboard_is_pos_on_board( path_ctx__io->cb_current, moving_from.pos.i, moving_from.pos.j ) ) return false;
 //     if ( !cc_path_context_is_legal( path_ctx__io, true, true ) ) return false;
-//     if ( !cc_activation_desc_is_valid( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
+//     if ( !cc_activation_desc_is_legal( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
 //     CcPos pos = moving_from.pos;
 //     CcPathSideEffectLink * sel__t = NULL;
@@ -255,28 +255,43 @@ bool cc_path_side_effects( CcPosDesc moving_from,
     CcChessboard * cb = path_ctx__io->cb_current;
     if ( !cb ) return false;
 
-    CcActivationDesc act_desc = path_ctx__io->ply_ctx.act_desc;
-    CcMultiStagePlyTypeEnum ms = path_ctx__io->move_ctx.multi_stage;
+    CcPathContext * path_ctx__a = cc_path_context_duplicate_all__new( path_ctx__io );
+    if ( !path_ctx__a ) return false;
+
+    CcActivationDesc * ad__w = &( path_ctx__a->ply_ctx.act_desc );
+    CcMultiStagePlyTypeEnum ms = path_ctx__a->move_ctx.multi_stage;
 
     if ( !CC_PIECE_IS_VALID( moving_from.piece ) ) return false;
     if ( !CC_PIECE_IS_ENUMERATOR( encounter.piece ) ) return false; // Encountered piece == none, if en passant, for example.
 
-    if ( !cc_activation_desc_is_valid( act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
+    if ( !cc_activation_desc_is_legal( *ad__w, moving_from.piece, path_ctx__a->ply_ctx.is_first ) ) return false;
 
     if ( !cc_chessboard_is_pos_on_board( cb, moving_from.pos.i, moving_from.pos.j ) ) return false;
     if ( !cc_chessboard_is_pos_on_board( cb, encounter.pos.i, encounter.pos.j ) ) return false;
 
     CcStep * steps__t = NULL;
+    bool is_encounter_step_appended = false;
+
+    CcPathLink * pl_next__t = NULL;
+
+    #define STEP_COUNT (1)
 
     //
     // Terminal side-effects.
 
     if ( cc_check_piece_can_capture( moving_from.piece, encounter.piece ) ) {
+        if ( cc_activation_desc_calc_momentum( ad__w, STEP_COUNT ) != CC_MBE_True ) { // TODO :: FIX :: momentum in test is not updated
+            cc_step_free_all( &steps__t );
+            return false;
+        }
+
         CcStep * step__w = cc_step_capture_append( &steps__t, CC_SLTE_Next, encounter.pos, encounter.piece );
         if ( !step__w ) {
             cc_step_free_all( &steps__t );
             return false;
         }
+
+        is_encounter_step_appended = true;
     }
 
     // TODO :: other terminating side-effects
@@ -284,15 +299,35 @@ bool cc_path_side_effects( CcPosDesc moving_from,
     //
     // Non-terminal side-effects.
 
-    if ( cc_check_piece_can_step_over( moving_from.piece, encounter.piece, act_desc.momentum ) ) {
+    if ( cc_check_piece_can_step_over( moving_from.piece, encounter.piece, ad__w->momentum ) ) {
         CcSideEffect se = cc_side_effect_transparency( encounter.piece );
+        CcPosDesc moving_from_transparency = CC_POS_DESC_CAST( encounter.pos, moving_from.piece );
 
+        if ( !is_encounter_step_appended ) {
+            if ( cc_activation_desc_calc_momentum( ad__w, STEP_COUNT ) != CC_MBE_True ) { // TODO :: FIX :: momentum in test is not updated
+                cc_step_free_all( &steps__t );
+                return false;
+            }
+
+            CcStep * step__w = cc_step_append_next_no_side_effect( &steps__t, encounter.pos );
+            if ( !step__w ) {
+                cc_step_free_all( &steps__t );
+                return false;
+            }
+
+            is_encounter_step_appended = true;
+        }
+
+        if ( !cc_path_segment( se, moving_from_transparency, step_1, step_2, path_ctx__a, &pl_next__t ) ) {
+            cc_path_link_free_all( &pl_next__t );
+            return false;
+        }
     }
 
     if ( CC_PIECE_CAN_CAPTURE_EN_PASSANT( moving_from.piece ) &&
             ( encounter.piece == CC_PTE_None ) ) { // TODO :: or encountered piece can be activated
         CcPosDesc en_passant = CC_POS_DESC_CAST_INVALID;
-        if ( cc_find_en_passant_target( cb, moving_from.piece, act_desc, path_ctx__io->ply_ctx.is_first, encounter.pos, &en_passant ) ) {
+        if ( cc_find_en_passant_target( cb, moving_from.piece, *ad__w, path_ctx__a->ply_ctx.is_first, encounter.pos, &en_passant ) ) {
             CcSideEffect se = cc_side_effect_en_passant( en_passant.piece, en_passant.pos );
 
         }
@@ -341,9 +376,20 @@ bool cc_path_side_effects( CcPosDesc moving_from,
         CcStep * step__w = cc_step_extend( &( (*path_link__io_a)->steps ), &steps__t );
         if ( !step__w ) {
             cc_step_free_all( &steps__t );
+            cc_path_link_free_all( &pl_next__t );
             return false;
         }
     }
+
+    if ( !cc_path_link_extend( path_link__io_a, &pl_next__t ) ) {
+        cc_step_free_all( &steps__t );
+        cc_path_link_free_all( &pl_next__t );
+        return false;
+    }
+
+    path_ctx__io->ply_ctx.act_desc = path_ctx__a->ply_ctx.act_desc;
+
+    cc_path_context_free_all( &path_ctx__a );
 
     return true;
 }
@@ -361,7 +407,7 @@ bool cc_path_segment( CcSideEffect side_effect,
     if ( !cc_path_context_is_legal( path_ctx__io, true, true ) ) return false;
 
     if ( !cc_chessboard_is_pos_on_board( path_ctx__io->cb_current, moving_from.pos.i, moving_from.pos.j ) ) return false;
-    if ( !cc_activation_desc_is_valid( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
+    if ( !cc_activation_desc_is_legal( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
     cc_uint_t board_size = cc_variant_board_size( path_ctx__io->cb_current->type );
     CcPos pos = moving_from.pos;

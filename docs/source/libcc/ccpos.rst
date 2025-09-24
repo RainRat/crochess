@@ -420,20 +420,20 @@ Position descriptor
     :returns: Casted position descriptor value.
     :seealso: :c:macro:`CC_POS_DESC_COORDS`
 
-.. c:macro:: CC_POS_DESC(pos,piece_enum)
+.. c:macro:: CC_POS_DESC(pos_v,piece_enum)
 
     Macro which constructs position descriptor struct.
 
-    :param pos: A position; :c:type:`CcPos` value.
+    :param pos_v: A position; :c:type:`CcPos` value.
     :param piece_enum: A piece; :c:type:`CcPieceTagType` value.
     :returns: Position descriptor value.
     :seealso: :c:struct:`CcPosDesc`
 
-.. c:macro:: CC_POS_DESC_CAST(pos,piece_enum)
+.. c:macro:: CC_POS_DESC_CAST(pos_v,piece_enum)
 
     Macro which casts position descriptor macro.
 
-    :param pos: A position; :c:type:`CcPos` value.
+    :param pos_v: A position; :c:type:`CcPos` value.
     :param piece_enum: A piece; :c:type:`CcPieceTagType` value.
     :returns: Casted position descriptor value.
     :seealso: :c:macro:`CC_POS_DESC`
@@ -720,7 +720,7 @@ Activation descriptor
     :param ad_2: Activation descriptor, :c:type:`CcActivationDesc` value.
     :returns: :c:data:`true` if equal, :c:data:`false` otherwise.
 
-.. c:function:: bool cc_activation_desc_is_valid( CcActivationDesc act_desc, CcPieceTagType moving, bool is_first_ply )
+.. c:function:: bool cc_activation_desc_is_legal( CcActivationDesc act_desc, CcPieceTagType moving, bool is_first_ply )
 
     Function checks if a given activation descriptor is valid,
     for a given piece and its ply within cascade.
@@ -771,7 +771,7 @@ Activation descriptor
     :param moving: A moving piece, to which activation descriptor applies.
     :param is_first_ply: Flag, if current ply is first in a cascade.
     :returns: :c:data:`true` if activation descriptor is valid and usable, :c:data:`false` otherwise.
-    :seealso: :c:func:`cc_activation_desc_is_valid()`
+    :seealso: :c:func:`cc_activation_desc_is_legal()`
 
 .. c:function:: bool cc_activation_desc_as_string( CcActivationDesc act_desc, cc_char_32 * act_dest_str__o )
 

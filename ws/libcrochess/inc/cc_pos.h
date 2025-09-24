@@ -119,9 +119,9 @@ typedef struct CcPosDesc {
 #define CC_POS_DESC_COORDS_CAST(int_i,int_j,piece_enum)             \
     ( (CcPosDesc)CC_POS_DESC_COORDS( (int_i), (int_j), (piece_enum) ) )
 
-#define CC_POS_DESC(pos,piece_enum) { .pos = (pos), .piece = (CcPieceTagType)(piece_enum) }
+#define CC_POS_DESC(pos_v,piece_enum) { .pos = (pos_v), .piece = (CcPieceTagType)(piece_enum) }
 
-#define CC_POS_DESC_CAST(pos,piece_enum) ( (CcPosDesc){ .pos = (pos), .piece = (CcPieceTagType)(piece_enum) } )
+#define CC_POS_DESC_CAST(pos_v,piece_enum) ( (CcPosDesc){ .pos = (pos_v), .piece = (CcPieceTagType)(piece_enum) } )
 
 #define CC_POS_DESC_IS_VALID(pd) \
     ( CC_POS_IS_VALID( (pd).pos ) && CC_PIECE_IS_ENUMERATOR( (pd).piece ) ) )
@@ -208,7 +208,7 @@ typedef struct CcActivationDesc {
                                                  ( (ad_1).momentum == (ad_2).momentum ) && \
                                                  ( (ad_1).usage == (ad_2).usage ))
 
-bool cc_activation_desc_is_valid( CcActivationDesc act_desc,
+bool cc_activation_desc_is_legal( CcActivationDesc act_desc,
                                   CcPieceTagType moving,
                                   bool is_first_ply );
 

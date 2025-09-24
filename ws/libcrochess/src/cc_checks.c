@@ -118,6 +118,7 @@ bool cc_check_piece_can_capture( CcPieceTagType moving,
     if ( !CC_PIECE_IS_VALID( encounter ) ) return false;
     if ( !CC_PIECE_CAN_CAPTURE( moving ) ) return false; // This weeds out invalid pieces, and those without owner.
     if ( !CC_PIECE_CAN_BE_CAPTURED( encounter ) ) return false; // Also weeds out invalid pieces, and those without owner.
+    // All pieces that can capture also use momentum for movement, capture can be done with no momentum.
     if ( !cc_piece_has_different_owner( moving, encounter ) ) return false;
     return true;
 }
@@ -183,7 +184,7 @@ bool cc_check_piece_is_blocked_at( CcChessboard * cb,
                                    CcPos pos ) {
     if ( !cb ) return false;
 
-    if ( !cc_activation_desc_is_valid( act_desc, moving, is_first_ply ) ) return false;
+    if ( !cc_activation_desc_is_legal( act_desc, moving, is_first_ply ) ) return false;
 
     CcPieceTagType encounter = cc_chessboard_get_piece( cb, pos.i, pos.j );
 
@@ -207,7 +208,7 @@ bool cc_check_piece_can_activate_at( CcChessboard * cb,
     if ( !cb ) return false;
     if ( !CC_POS_IS_LEGAL( destination, cc_chessboard_get_size( cb ) ) ) return false;
 
-    if ( !cc_activation_desc_is_valid( act_desc, moving, is_first_ply ) ) return false;
+    if ( !cc_activation_desc_is_legal( act_desc, moving, is_first_ply ) ) return false;
 
     CcPieceTagType encounter = cc_chessboard_get_piece( cb, destination.i, destination.j );
 
