@@ -306,7 +306,7 @@
                                   || ( (pte) == CC_PTE_LightShaman )       \
                                   || ( (pte) == CC_PTE_LightStarchild ) )
 
-// TODO :: MAYBE :: Scout, Grenadier cannot diverge
+// todo :: MAYBE :: Scout, Grenadier cannot diverge
 #define CC_PIECE_CAN_BE_DIVERGED(pte)   ( CC_PIECE_IS_PAWN( (pte) )             \
                                        || CC_PIECE_IS_KNIGHT( (pte) )           \
                                        || CC_PIECE_IS_BISHOP( (pte) )           \
@@ -491,10 +491,8 @@ bool cc_piece_is_owned_figure( CcPieceTagType ptt );
 
 bool cc_piece_is_figure( CcPieceTagType ptt );
 
-// TODO :: DOCS
 bool cc_piece_is_one_step( CcPieceTagType piece, CcPieceTagType activator );
 
-// TODO :: DOCS
 bool cc_piece_is_two_step( CcPieceTagType piece, CcPieceTagType activator );
 
 bool cc_piece_is_many_steps( CcPieceTagType piece );
