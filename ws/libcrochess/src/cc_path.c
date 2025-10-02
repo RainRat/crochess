@@ -406,8 +406,8 @@ size_t cc_path_node_count_all_segments( CcPathNode * path_node ) { // TODO :: RE
     return count;
 }
 
-char * cc_path_node_to_string__new( cc_uchar_t depth,
-                                    CcPathNode * path_node ) {
+static char * _cc_path_node_to_string__new( cc_uchar_t depth,
+                                            CcPathNode * path_node ) {
     if ( !path_node ) return NULL;
 
     cc_uint_t tabs_len = 2 * depth; // Depth --> 2-spaces.
@@ -432,32 +432,26 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     str_len += cc_str_len( se_str, NULL, CC_SIZE_CHAR_16 );
     str_len += 2 + 1 + 1; // For .encounter (i.e. CcPieceTagType); +2 for ' @', +1 for piece symbol, +1 for tag char.
     str_len += 3 + CC_SIZE_CHAR_32; // For .act_desc (i.e. CcActivationDesc); +3 for ' #' preceeding act desc.
+    str_len += 2; // +2 for new line char(s), any of \LF (Linux, ...), \CR\LF (Windows, ...), or \CR (others)
 
     size_t str_size = str_len + 1; // +1 for '\0'
 
-    char * pln_str__a = malloc( str_size );
-    if ( !pln_str__a ) {
+    char * pln_str__t = CC_MALLOC( str_size );
+    if ( !pln_str__t ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
         return NULL;
     }
 
-    if ( !cc_str_clear( pln_str__a, str_size ) ) { // TODO :: DEBUG :: not really needed
-        CC_FREE( tabs_str__a );
-        CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
-        return NULL;
-    }
-
-    char * pln_str = pln_str__a;
-    char const * pln_end__w = pln_str__a + str_size;
+    char * pln_str = pln_str__t;
+    char const * pln_end__w = pln_str__t + str_size;
 
     // Tabs.
     char const * end_tabs_str__w = cc_str_append_into( pln_str, pln_end__w, CC_SIZE_IGNORE, tabs_str__a, NULL, tabs_len );
     if ( !end_tabs_str__w ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
     pln_str = (char *)end_tabs_str__w;
@@ -467,7 +461,7 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     if ( !end_plnle_str__w ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
     pln_str = (char *)end_plnle_str__w;
@@ -477,7 +471,7 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     if ( !end_se_str__w ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
     pln_str = (char *)end_se_str__w;
@@ -487,7 +481,7 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     if ( !end_steps__w ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
     pln_str = (char *)end_steps__w;
@@ -508,7 +502,7 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     if ( !cc_activation_desc_as_string( path_node->act_desc, &act_desc_str ) ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
 
@@ -520,7 +514,7 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     if ( !end_act_desc__w ) {
         CC_FREE( tabs_str__a );
         CC_FREE( steps_str__a );
-        CC_FREE( pln_str__a );
+        CC_FREE( pln_str__t );
         return NULL;
     }
     // pln_str = (char *)end_act_desc__w; // Not needed anymore.
@@ -528,7 +522,80 @@ char * cc_path_node_to_string__new( cc_uchar_t depth,
     CC_FREE( tabs_str__a );
     CC_FREE( steps_str__a );
 
+    // Recursive stuff.
+    char * pln_fork__t = NULL;
+    char * pln_alt__t = NULL;
+    char * pln_sub__t = NULL;
+    char const * fmt = "\n%s\n%s\n%s";
+    cc_uint_t str_size_empty = 2 * ( depth + 1 );
+
+    if ( path_node->fork ) {
+        pln_fork__t = _cc_path_node_to_string__new( depth + 1, path_node->fork );
+        if ( !pln_fork__t ) {
+           CC_FREE( pln_str__t );
+           return NULL;
+        }
+    } else {
+        pln_fork__t = CC_MALLOC( str_size_empty );
+        if ( !pln_fork__t ) {
+           CC_FREE( pln_str__t );
+           return NULL;
+        }
+
+        *( pln_fork__t + str_size_empty - 2 ) = '>';
+    }
+
+    if ( path_node->alt ) {
+        pln_alt__t = _cc_path_node_to_string__new( depth + 1, path_node->alt );
+        if ( !pln_alt__t ) {
+            CC_FREE( pln_fork__t );
+            CC_FREE( pln_str__t );
+            return NULL;
+        }
+    } else {
+        pln_alt__t = CC_MALLOC( str_size_empty );
+        if ( !pln_alt__t ) {
+            CC_FREE( pln_fork__t );
+            CC_FREE( pln_str__t );
+            return NULL;
+        }
+
+        *( pln_alt__t + str_size_empty - 2 ) = '^';
+    }
+
+    if ( path_node->sub ) {
+        pln_sub__t = _cc_path_node_to_string__new( depth + 1, path_node->sub );
+        if ( !pln_sub__t ) {
+            CC_FREE( pln_alt__t );
+            CC_FREE( pln_fork__t );
+            CC_FREE( pln_str__t );
+            return NULL;
+        }
+    } else {
+        pln_sub__t = CC_MALLOC( str_size_empty );
+        if ( !pln_sub__t ) {
+            CC_FREE( pln_alt__t );
+            CC_FREE( pln_fork__t );
+            CC_FREE( pln_str__t );
+            return NULL;
+        }
+
+        *( pln_sub__t + str_size_empty - 2 ) = '.';
+    }
+
+    // pln_str__t ownership is transferred in-function, do not free( pln_str__t ) afterwards.
+    // Other strings do not have their ownership transferred, so do free() those.
+    char * pln_str__a = cc_str_append_fmt__new( &pln_str__t, CC_MAX_LEN_ZERO_TERMINATED, fmt, pln_fork__t, pln_alt__t, pln_sub__t );
+
+    CC_FREE( pln_sub__t );
+    CC_FREE( pln_alt__t );
+    CC_FREE( pln_fork__t );
+
     return pln_str__a;
+}
+
+char * cc_path_node_to_string__new( CcPathNode * path_node ) {
+    return _cc_path_node_to_string__new( 0, path_node );
 }
 
 //
