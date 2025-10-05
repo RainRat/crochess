@@ -38,7 +38,7 @@
 #include "tests.h"
 
 
-char const CROCHESS_TESTS_VERSION[] = "0.0.1.336:1515+20251001.052753"; // source-new-crochess-tests-version-major-minor-feature-commit+meta~breaks-place-marker
+char const CROCHESS_TESTS_VERSION[] = "0.0.1.337:1516+20251004.041602"; // source-new-crochess-tests-version-major-minor-feature-commit+meta~breaks-place-marker
 
 #ifdef __WITH_LINE_NOISE__
 char const CROCHESS_TESTS_HISTORY_FILE_NAME[] = "history_tests.txt";
@@ -295,6 +295,8 @@ int main( void ) {
             }
         } else if ( cc_str_is_equal( token_start, token_end, "u", NULL, BUFSIZ ) ||
                     cc_str_is_equal( token_start, token_end, "update", NULL, BUFSIZ ) ) {
+            // TODO :: FIX :: unrecognized tags are ignored
+            // e.g. "n cc" + "c" + "u Ra1R,Ke1R,bf3,ke4,Qh1", instead of ... + "u Ra1&,Ke1&,bf3,ke4,Qh1"
             CcGame * game__t = cc_game_setup_from_string__new( token_end + 1, game__a );
 
             if ( !game__t )
@@ -305,6 +307,8 @@ int main( void ) {
             }
         } else if ( cc_str_is_equal( token_start, token_end, "s", NULL, BUFSIZ ) ||
                     cc_str_is_equal( token_start, token_end, "setup", NULL, BUFSIZ ) ) {
+            // TODO :: FIX :: does not parse/apply variants
+            // TODO :: FIX :: switches to One variants, when none is given
             CcGame * game__t = cc_game_setup_from_string__new( token_end + 1, NULL );
 
             if ( !game__t )
