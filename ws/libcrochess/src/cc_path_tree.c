@@ -417,16 +417,24 @@ bool cc_path_segment( CcSideEffect side_effect,
     if ( !path_node__o_a ) return false;
     if ( *path_node__o_a ) return false;
 
-    if ( !CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) return false;
     if ( !cc_path_context_is_legal( path_ctx__io, true, true ) ) return false;
 
-    if ( !cc_chessboard_is_pos_on_board( path_ctx__io->cb_current, moving_from.pos.i, moving_from.pos.j ) ) return false;
+    cc_uint_t board_size = cc_variant_board_size( path_ctx__io->cb_current->type );
+
+    if ( !CC_POS_DESC_IS_LEGAL( moving_from, board_size ) ) return false;
+
     if ( !cc_activation_desc_is_legal( path_ctx__io->ply_ctx.act_desc, moving_from.piece, path_ctx__io->ply_ctx.is_first ) ) return false;
 
-    cc_uint_t board_size = cc_variant_board_size( path_ctx__io->cb_current->type );
-    CcPos pos = moving_from.pos;
+    CcActivationDesc act_desc = path_ctx__io->ply_ctx.act_desc;
 
+    if ( !cc_piece_is_one_step( moving_from.piece, act_desc.activator ) &&
+         !cc_piece_is_two_step( moving_from.piece, act_desc.activator ) ) return false;
+
+    CcPos pos = moving_from.pos;
     CcStep * steps__t = NULL;
+
+    // TODO :: DELETE :: after cc_path_tree_init(), cc_path_tree() is plugged-in
+    //
     // If side-effect is valid --> this is movement from encounter, not initial piece movement -->
     // this step is already added to the parent path node steps, in cc_path_side_effects() --> skip it here.
     bool skip_first = CC_SIDE_EFFECT_TYPE_IS_VALID( side_effect.type );
@@ -434,9 +442,10 @@ bool cc_path_segment( CcSideEffect side_effect,
         steps__t = cc_step_initial_no_side_effect__new( pos );
         if ( !steps__t ) return false;
     }
+    //
+    // TODO :: DELETE :: after cc_path_tree_init(), cc_path_tree() is plugged-in
 
     bool is_starting_pos = path_ctx__io->ply_ctx.is_first;
-    CcActivationDesc act_desc = path_ctx__io->ply_ctx.act_desc;
     CcActivationDesc ad = act_desc;
     CcPieceTagType encounter = CC_PTE_None;
     CcTypedStep step = CC_TYPED_STEP_CAST_INVALID;
@@ -502,52 +511,90 @@ bool cc_path_segment( CcSideEffect side_effect,
     return true;
 }
 
-bool cc_path_tree( CcSideEffect side_effect,
-                   CcPosDesc moving_from,
+bool cc_path_tree( CcPosDesc moving_from,
                    CcPathContext * path_ctx__io,
-                   CcPathNode * pl__io ) {
+                   CcPathNode ** path_node__io_a ) {
     if ( !path_ctx__io ) return false;
-    if ( !pl__io ) return false;
+    // if ( !path_ctx__io->cb_current ) return false; // Checked later, if path context is legal, at [1].
 
-    if ( !cc_path_context_is_legal( path_ctx__io, true, false ) ) return false;
+    if ( !path_node__io_a ) return false;
+    if ( !*path_node__io_a ) return false;
+    // if ( !( (*path_node__io_a)->steps ) ) return false; // Steps can be NULL.
 
-    bool sideways_pawns = CC_VARIANT_HAS_SIDEWAYS_PAWNS( path_ctx__io->game__w->chessboard->type );
-    bool is_same_color = cc_pos_piece_are_same_color( moving_from.pos, moving_from.piece );
-    CcTypedStep const * step = NULL;
+    if ( !cc_path_context_is_legal( path_ctx__io, true, false ) ) return false; // [1]
 
-    if ( CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) {
-        while ( cc_iter_piece_steps( moving_from.piece,
-                                     sideways_pawns,
-                                     is_same_color, // Filler, Unicorn and Centaur are not one-step pieces.
-                                     CC_SDE_BothDiagonals, // Filler, Serpent is not one-step piece.
-                                     CC_STE_None, // No filtering by step types.
-                                     &step ) ) {
+    // TODO :: DEBUG :: REVERT
+    //
+    // bool sideways_pawns = CC_VARIANT_HAS_SIDEWAYS_PAWNS( path_ctx__io->game__w->chessboard->type );
+    // bool is_same_color = cc_pos_piece_are_same_color( moving_from.pos, moving_from.piece );
+    //
+    // CcTypedStep const * step__w = NULL;
+    //
+    // if ( CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) {
+    //     while ( cc_iter_piece_steps( moving_from.piece,
+    //                                  sideways_pawns,
+    //                                  is_same_color, // Filler, Unicorn and Centaur are not one-step pieces.
+    //                                  CC_SDE_BothDiagonals, // Filler, Serpent is not one-step piece.
+    //                                  CC_STE_None, // No filtering by step types.
+    //                                  &step__w ) ) {
 
-        }
-    } // TODO :: other (types of) pieces
+    //     }
+    // } // TODO :: other (types of) pieces
+    //
+    // TODO :: DEBUG :: REVERT
 
+    // TODO :: DEBUG :: DELETE
+    //
+    CcTypedStep step = CC_TYPED_STEP_CAST( 1, -1, CC_STE_CaptureOrMovement );
+    CcPathNode * path_node__t = NULL;
+    CcSideEffect se = cc_side_effect_none();
 
-    return false; // TODO :: FIX
+    if ( (*path_node__io_a)->back__w ) {
+        CcPieceTagType encounter = cc_chessboard_get_piece( path_ctx__io->cb_current,
+                                                            moving_from.pos.i,
+                                                            moving_from.pos.j );
+
+        if ( !CC_PIECE_IS_DIVERGENT( encounter ) ) return false;
+
+        se = cc_side_effect_diversion( encounter );
+    }
+
+    if ( !cc_path_segment( se, moving_from, step, CC_TYPED_STEP_CAST_INVALID, path_ctx__io, &path_node__t ) ) {
+        // cc_path_node_free_all( &path_node__t ); // Not needed, path node is set only after everything passes ok.
+        return false;
+    }
+
+    if ( cc_path_node_add_fork( path_node__io_a, &path_node__t ) ) {
+        cc_path_node_free_all( &path_node__t );
+        return false;
+    }
+    //
+    // TODO :: DEBUG :: DELETE
+
+    return true;
 }
 
-bool cc_path_tree_init__new( CcGame * game,
-                             CcPosDesc moving_from,
-                             CcPathNode ** path_link__iod_a,
-                             CcPathContext ** path_ctx__iod_a ) {
+bool cc_path_tree_init( CcGame * game,
+                        CcPosDesc moving_from,
+                        CcPathContext ** path_ctx__iod_a,
+                        CcPathNode ** path_node__iod_a ) {
     if ( !game ) return false;
     if ( !game->chessboard ) return false;
-
-    cc_uint_t board_size = cc_chessboard_get_size( game->chessboard );
-    if ( !CC_POS_DESC_IS_LEGAL( moving_from, board_size ) ) return false;
 
     if ( !path_ctx__iod_a ) return false;
     if ( *path_ctx__iod_a ) return false;
 
-    if ( !path_link__iod_a ) return false;
-    if ( *path_link__iod_a ) return false;
+    if ( !path_node__iod_a ) return false;
+    if ( *path_node__iod_a ) return false;
 
-    if ( !CC_PIECE_IS_ACTIVE( moving_from.piece ) ) return false;
-    if ( !cc_chessboard_is_pos_on_board( game->chessboard, moving_from.pos.i, moving_from.pos.j ) ) return false;
+    if ( !CC_PIECE_IS_ACTIVE( moving_from.piece ) ) return false; // Only active piece can start a cascade.
+
+    cc_uint_t board_size = cc_chessboard_get_size( game->chessboard );
+    if ( !CC_POS_IS_LEGAL( moving_from.pos, board_size ) ) return false;
+
+    // For the first piece in a cascade moving_from piece, tag and its position is the same as found on the chessboard.
+    CcPieceTagType piece = cc_chessboard_get_piece( game->chessboard, moving_from.pos.i, moving_from.pos.j );
+    if ( piece != moving_from.piece ) return false;
 
     *path_ctx__iod_a = cc_path_context__new( game ); // Game ownership has not been transferred here.
     if ( !*path_ctx__iod_a ) return false;
@@ -557,15 +604,16 @@ bool cc_path_tree_init__new( CcGame * game,
         return false;
     }
 
-    // <!> Piece, and its tag, might not be at moving_from.pos position on chessboard,
-    //     e.g. if already activated (transitioning problem); for everything
-    //     else chessboard should be correct.
-
     CcSideEffect se = cc_side_effect_none();
     CcActivationDesc ad = CC_ACTIVATION_DESC_CAST_INITIAL; // Activation descriptor in path context is also initialized to the same.
+    CcStep * steps__t = cc_step_initial_no_side_effect__new( moving_from.pos );
+    if ( !steps__t ) {
+        cc_path_context_free_all( path_ctx__iod_a );
+        return false;
+    }
 
-    *path_link__iod_a = cc_path_node__new( se, NULL, moving_from.piece, ad );
-    if ( !*path_link__iod_a ) {
+    *path_node__iod_a = cc_path_node__new( se, &steps__t, moving_from.piece, ad );
+    if ( !*path_node__iod_a ) {
         cc_path_context_free_all( path_ctx__iod_a );
         return false;
     }
