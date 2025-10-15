@@ -464,6 +464,8 @@ for duration of a ply. So, Wave activated by King moves like a Queen.
 \label{fig:scn_mv_021_wave_activation_by_step_pawn}
 \end{figure}
 
+\TODO :: Wave cannot activate Pyramid, only material pieces
+
 \vspace*{-0.5\baselineskip}
 Pawn can activate Wave on its step-fields, from which Wave inherits its steps, a
 forward step and two diagonal steps.
@@ -482,6 +484,8 @@ does not have to activate Wave, and can continue rushing further instead.
 \caption{Wave activated on Pawn's step-field}
 \label{fig:scn_mv_022_wave_activated_by_step_pawn}
 \end{figure}
+
+\TODO :: Wave cannot activate Pyramid, only material pieces
 
 \vspace*{-0.5\baselineskip}
 Unlike Pawn, Wave can choose any step, including diagonal, even if that step-field
@@ -509,6 +513,8 @@ Wave activated by rushing Pawn behaves the same, except it receives more momentu
 \label{fig:scn_mv_023_wave_activation_by_capture_pawn}
 \end{figure}
 
+\TODO :: Wave cannot activate Pyramid, only material pieces
+
 \vspace*{-0.5\baselineskip}
 Wave can be activated by Pawn on its capture-field, with 1 momentum. Activated
 Wave inherits the same steps as if activated on Pawn's step-fields; i.e. it moves
@@ -528,6 +534,8 @@ momentum.
 \caption{Wave activated on Pawn's capture-field}
 \label{fig:scn_mv_024_wave_activated_by_capture_pawn}
 \end{figure}
+
+\TODO :: Wave cannot activate Pyramid, only material pieces
 
 \vspace*{-0.5\baselineskip}
 \hyperref[sec:Terms/Activator]{Activator} is material (non-Wave) piece from which
@@ -801,118 +809,38 @@ longest rush movement available in this variant.
 \addcontentsline{toc}{subsubsection}{Activating Pyramid}
 \label{sec:Miranda's veil/Wave/Cascading Waves/Activating Pyramid}
 
-\vspace*{-1.4\baselineskip}
-\noindent
-\begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_038_activating_pyramid_by_pawn.png}
-\vspace*{-1.3\baselineskip}
-\caption{Activating Pyramid by Pawn}
-\label{fig:scn_mv_038_activating_pyramid_by_pawn}
-\end{figure}
-
-\vspace*{-0.3\baselineskip}
-Image above and the next one both have two examples presented in parallel; on the left,
-and to the right.
-
-Pawn cannot activate Pyramid on its step-fields, regardless
-\hyperref[fig:scn_ma_04_pyramid_activation_by_pawn]{if it's direct activation}, or in a cascade
-(right example, above). All pieces, including Pawn, can activate Pyramid on their capture-fields,
-both in \hyperref[fig:scn_ma_01_pyramid_activation_init]{a direct activation}, or in a cascade
-(left example, above).
-
-\clearpage % ..........................................................
-
-\vspace*{-2.5\baselineskip}
-\noindent
-\begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_039_activating_pyramid_cascade_pawn.png}
-\vspace*{-1.5\baselineskip}
-\caption{Activating Pyramid by cascading Pawn}
-\label{fig:scn_mv_039_activating_pyramid_cascade_pawn}
-\end{figure}
-
-\vspace*{-0.5\baselineskip}
-All pieces can activate Pyramid on their capture-fields, even if a Pawn in cascade
-used step-fields to continue (or start) said cascade (right example, above).
-
-So, if Pyramid can be activated depends solely if last active piece (preceding that
-Pyramid in a cascade) traveled over its step- or capture-fields. This is so for all
-subsequent activations, what Wave can activate is what last active piece preceding
-it in a cascade could activate, with addition of opponent's Wave.
-
-% .................................................. Activating Pyramid
-\clearpage % ..........................................................
-% Cascading to Pyramid ................................................
-
-\subsubsection*{Cascading to Pyramid}
-\addcontentsline{toc}{subsubsection}{Cascading to Pyramid}
-\label{sec:Miranda's veil/Wave/Cascading Waves/Cascading to Pyramid}
-
 \vspace*{-0.9\baselineskip}
 \noindent
-\begin{wrapfigure}[16]{l}{0.4\textwidth}
+\begin{wrapfigure}[7]{l}{0.4\textwidth}
 \centering
-\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_040_cascading_wave_to_pyramid_init.png}
+\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_038_not_activating_pyramid_by_wave.png}
 \vspace*{-1.4\baselineskip}
-\caption{Step-fields to Pyramid}
-\label{fig:scn_mv_040_cascading_wave_to_pyramid_init}
+\caption{Wave cannot activate Pyramid}
+\label{fig:scn_mv_038_not_activating_pyramid_by_wave}
 \end{wrapfigure}
-Again, \hyperref[sec:Terms/Activator]{activator} is material (non-Wave) piece from
-which Wave inherits its steps; here it's light Pawn. Wave by itself doesn't have
-capture-fields; those are just a shorthand for its activator's capture-fields.\newline
-\indent
-To be able to activate Pyramid, Wave activating a Pyramid and its activator has to
-move over their capture-fields; other Waves in a cascade can still move over their
-step-fields.\newline
-\indent
-Here, and in next example Pawn activates Wave A, which then activates Wave B.
+Wave cannot activate Pyramid.
 
-\vspace*{-0.4\baselineskip}
+Here, light Wave is about to be activated by light Bishop with 3 momentum.
+Light Wave can reach light Pyramid, but cannot interact with it; Wave can
+use its transparency, and move past Pyramid.
+
+\vspace*{7.7\baselineskip}
 \noindent
-\begin{wrapfigure}[15]{l}{0.4\textwidth}
+\begin{wrapfigure}[10]{l}{0.4\textwidth}
 \centering
-\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_041_cascading_wave_to_pyramid_end.png}
+\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_039_activating_pyramid_cascade_pawn.png}
 \vspace*{-1.4\baselineskip}
-\caption{Capture-fields to Pyramid}
-\label{fig:scn_mv_041_cascading_wave_to_pyramid_end}
+\caption{Activating Pyramid in a cascade}
+\label{fig:scn_mv_039_activating_pyramid_cascade_pawn}
 \end{wrapfigure}
-In previous example, light Pawn activated Wave A on its step-field; so, even if Wave
-B takes diagonal, capture-steps, it still wouldn't be able to activate Pyramid B.\newline
-\indent
-Here, light Pawn activates Wave A on its capture-field; if Wave B would take diagonal
-capture-steps, it now would be able to activate Pyramid B.\newline
-\indent
-In both cases, Wave A moving straight forward over its step-fields is of no consequence,
-since it doesn't activate Pyramid directly. Also, in both examples, Pyramid A cannot be
-activated since it's on Wave B's step-field.
+Pyramid can be activated in a cascade by any material piece (i.e. any
+piece other than Wave).
 
-% ................................................ Cascading to Pyramid
-\clearpage % ..........................................................
-% Activated by Pyramid ................................................
+Here, light Wave is about to be activated by light Bishop with 3 momentum,
+which can then activate light Pawn; Pawn can then activate Pyramid on its
+capture-field, with 2 momentum.
 
-\subsubsection*{Activated by Pyramid}
-\addcontentsline{toc}{subsubsection}{Activated by Pyramid}
-\label{sec:Miranda's veil/Wave/Cascading Waves/Activated by Pyramid}
-
-\vspace*{-1.4\baselineskip}
-\noindent
-\begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_042_activated_by_pyramid.png}
-\vspace*{-1.3\baselineskip}
-\caption{Activated by Pyramid}
-\label{fig:scn_mv_042_activated_by_pyramid}
-\end{figure}
-
-\vspace*{-0.3\baselineskip}
-\hyperref[fig:scn_ma_02_pyramid_activated]{Pyramid can capture opponent's pieces},
-so Wave activated by Pyramid is activated on a capture-field, and can activate
-another Pyramid.
-
-Note, Wave inherits its movement from last material (non-Wave) piece in a cascade
-(here, Pyramid 1) even though it's passive piece, and not from the last active
-piece in a cascade (here, light Bishop).
-
-% ................................................ Activated by Pyramid
+% .................................................. Activating Pyramid
 \clearpage % ..........................................................
 % Reactivating pieces .................................................
 
@@ -1109,53 +1037,6 @@ has been done. This means, cascade would have to finish with activated light Que
 settling onto e.g. field 2, or 4, for that Queen to check dark King.
 
 % ............................................ Cascade check, checkmate
-\clearpage % ..........................................................
-% Converting opponent's pieces ........................................
-
-\subsubsection*{Converting opponent's pieces}
-\addcontentsline{toc}{subsubsection}{Converting opponent's pieces}
-\label{sec:Miranda's veil/Wave/Cascading Waves/Converting opponent's pieces}
-
-\vspace*{-1.4\baselineskip}
-\noindent
-\begin{figure}[h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_059_converting_opponents_piece_init.png}
-\vspace*{-1.3\baselineskip}
-\caption{Starting conversion cascade}
-\label{fig:scn_mv_059_converting_opponents_piece_init}
-\end{figure}
-
-\vspace*{-0.4\baselineskip}
-\hyperref[sec:Mayan Ascendancy/Pyramid/Conversion]{Conversion of opponent's pieces}
-can be done the same as before, only difference is that both converting Pyramid
-and opponent's piece has to be on
-\hyperref[sec:Definitions/Chessboard sides, navigation]{opponent's side} of a
-chessboard before final, conversion ply takes place.
-
-That means, either own Pyramid or opponent's piece (or both!) could be moved from
-own onto opponent's side of a chessboard before conversion is done, all in a single
-cascade.
-
-\clearpage % ..........................................................
-
-\vspace*{-2.1\baselineskip}
-\noindent
-\begin{figure}[h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_060_converting_opponents_piece_end.png}
-\vspace*{-1.3\baselineskip}
-\caption{Converting opponent's piece}
-\label{fig:scn_mv_060_converting_opponents_piece_end}
-\end{figure}
-
-\vspace*{-0.4\baselineskip}
-In previous example, light player started a conversion cascade by activating and
-moving light Pyramid from own onto opponent's side of a chessboard, before
-continuing to activate light Waves.
-
-Here, Wave B (now "in-the-air") is about to reactivate light Pyramid, which can
-then proceed on with converting dark Knight.
-
-% ........................................ Converting opponent's pieces
 % ----------------------------------------------------- Cascading Waves
 \clearpage % ..........................................................
 % Cascading opponent --------------------------------------------------
@@ -1348,53 +1229,6 @@ it cannot stay and re-activate piece that has activated it (here, light Wave 2).
 Thus, dark Wave B is oblationed, i.e. removed from chessboard.
 
 % ........................................................ Wave blocked
-\clearpage % ..........................................................
-% Converting own pieces ...............................................
-
-\subsubsection*{Converting own pieces}
-\addcontentsline{toc}{subsubsection}{Converting own pieces}
-\label{sec:Miranda's veil/Wave/Cascading opponent/Converting own pieces}
-
-\vspace*{-0.7\baselineskip}
-\noindent
-\begin{wrapfigure}[11]{l}{0.4\textwidth}
-\centering
-\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_076_converting_own_piece_init.png}
-\vspace*{-1.4\baselineskip}
-\caption{Converting own piece}
-\label{fig:scn_mv_076_converting_own_piece_init}
-\end{wrapfigure}
-\hyperref[fig:scn_mv_065_wave_cascading_opponent]{Opponent's pieces can be cascaded},
-they retain their behavior regardless which player is actually moving them, owner
-or opponent.\newline
-Since
-\hyperref[sec:Mayan Ascendancy/Pyramid/Conversion]{opponent's pieces can be converted},
-now that means own pieces can be converted to opponent's.
-
-Here, light player starts a cascade with its light Queen, activating dark Pyramid
-which can reach own, light Knight and convert it.
-
-\vspace*{0.7\baselineskip}
-\noindent
-\begin{wrapfigure}[14]{l}{0.4\textwidth}
-\centering
-\includegraphics[width=0.39375\textwidth, keepaspectratio=true]{examples/10_mv/scn_mv_077_converting_own_piece_end.png}
-\vspace*{-1.4\baselineskip}
-\caption{Own piece converted}
-\label{fig:scn_mv_077_converting_own_piece_end}
-\end{wrapfigure}
-On the left, grey arrows show path traveled over by a piece they point to.
-Cascade has been finished, dark Pyramid oblationed, and own, light Knight
-converted.
-
-Conversion can take place only if own piece and opponent's Pyramid were both located
-on \hyperref[sec:Definitions/Chessboard sides, navigation]{own side of a chessboard}
-when
-\hyperref[fig:scn_mv_059_converting_opponents_piece_init]{final, conversion ply started}.
-
-All own pieces can be converted, except King.
-
-% ............................................... Converting own pieces
 \clearpage % ..........................................................
 % Activating opponent's Wave ..........................................
 
