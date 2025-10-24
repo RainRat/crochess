@@ -357,22 +357,59 @@ of a chessboard, regardless if using Star of a matching or opposite color.
 \addcontentsline{toc}{section}{Sideways Pawns}
 \label{sec:Nineteen/Sideways Pawns}
 
-\vspace*{-1.5\baselineskip}
+% \vspace*{-1.5\baselineskip}
+% \noindent
+% \begin{figure}[!h]
+% \includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/12_n/scn_n_16_sideways_pawn_init.png}
+% \vspace*{-1.4\baselineskip}
+% \caption{Sideways moving Pawn}
+% \label{fig:scn_n_16_sideways_pawn_init} % TODO :: FIX :: LaTeX Warning: There were undefined references.
+% \end{figure}
+
+% \vspace*{-0.5\baselineskip}
+% In this and all subsequent variants Pawn can move sideways for one field, onto a field
+% immediately to its left, or to its right. Side fields are just step-fields; destination
+% has to be empty, or it can host own Wave.
+
+% Here, light Pawn can make one step onto empty field to the left; or it can move onto
+% the right step-field, and activate light Wave A, with one momentum.
+
+\vspace*{-0.3\baselineskip}
 \noindent
-\begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/12_n/scn_n_16_sideways_pawn_init.png}
+\begin{wrapfigure}[6]{l}{0.4\textwidth}
+\centering
+\includegraphics[width=0.4\textwidth, keepaspectratio=true]{examples/12_n/scn_n_16_sideways_pawn.png}
 \vspace*{-1.4\baselineskip}
-\caption{Sideways moving Pawn}
-\label{fig:scn_n_16_sideways_pawn_init}
-\end{figure}
-
-\vspace*{-0.5\baselineskip}
+\caption{Sideways Pawn}
+\label{fig:scn_n_16_sideways_pawn}
+\end{wrapfigure}
 In this and all subsequent variants Pawn can move sideways for one field, onto a field
-immediately to its left, or to its right. Side fields are just step-fields; destination
-has to be empty, or it can host own Wave.
+immediately to its left, or to its right. Side fields are just step-fields; Pawn cannot
+capture opponent's pieces on them.
 
-Here, light Pawn can make one step onto empty field to the left; or it can move onto
-the right step-field, and activate light Wave D, with one momentum.
+\vspace*{0.7\baselineskip}
+\noindent
+\begin{wrapfigure}[3]{l}{0.4\textwidth}
+\centering
+\includegraphics[width=0.4\textwidth, keepaspectratio=true]{examples/12_n/scn_n_17_sideways_pawn_cannot_activate_pyramid.png}
+\vspace*{-1.4\baselineskip}
+\caption{Sideways Pawn cannot activate Pyramid}
+\label{fig:scn_n_17_sideways_pawn_cannot_activate_pyramid}
+\end{wrapfigure}
+Sideways-moving Pawn cannot activate Pyramid, since Pyramid can be activated
+\hyperref[fig:scn_ma_04_pyramid_activation_by_pawn]{only on capture-fields}.
+
+\vspace*{4.7\baselineskip}
+\noindent
+\begin{wrapfigure}[3]{l}{0.4\textwidth}
+\centering
+\includegraphics[width=0.4\textwidth, keepaspectratio=true]{examples/12_n/scn_n_18_sideways_pawn_can_activate_wave.png}
+\vspace*{-1.4\baselineskip}
+\caption{Sideways Pawn can activate Wave}
+\label{fig:scn_n_18_sideways_pawn_can_activate_wave}
+\end{wrapfigure}
+Sideways-moving Pawn can activate Wave, since Wave can be activated
+\hyperref[fig:scn_mv_025_wave_activation_by_step_pawn]{on step-fields}.
 
 \clearpage % ..........................................................
 
@@ -391,9 +428,11 @@ from its \hyperref[sec:Terms/Activator]{activator}. Wave activated by sideways P
 can now move laterally in addition to
 \hyperref[fig:scn_mv_026_wave_activated_by_step_pawn]{straight and diagonally forward}.
 
-Here, activated Wave (now "in-the-air") can activate own Knight or any Wave, but none
-of Pyramids. Activated Wave cannot change direction once it starts moving; so, light
-Bishop is out of reach.
+Here, due to \hyperref[fig:scn_mv_011_wave_is_transparent]{its transparency} activated
+Wave (now "in-the-air") can reach and activate own Knight or any Wave; Wave
+\hyperref[fig:scn_mv_009_not_activating_pyramid_by_wave]{cannot activate any Pyramid}.
+Activated Wave cannot change direction once it starts moving; so, light Bishop is out
+of reach.
 
 \clearpage % ..........................................................
 % Activating Wave -----------------------------------------------------
@@ -434,14 +473,13 @@ momentum.
 
 \vspace*{-0.5\baselineskip}
 Activated Wave moves laterally, straight or diagonally forward, towards opponent's
-initial positions, until the end of a chessboard.\newline
-\indent
+initial positions, until the end of a chessboard.
+
 Here, Wave activated by sideways Pawn on its capture-field (now "in-the-air") can
 activate own pieces (here, e.g. light Knight) or any Wave (own or opponent's),
-but cannot activate any Pyramid.\newline
-\indent
-As before, activated Wave cannot change its direction once it starts moving;
-so, light Bishop is out of reach.
+but none of Pyramids.
+\hyperref[fig:scn_n_17_sideways_pawn_activated_wave]{As before}, activated Wave
+cannot change its direction once it starts moving; so, light Bishop is out of reach.
 
 \clearpage % ..........................................................
 % Activating opponent's Wave ..........................................
@@ -467,9 +505,7 @@ opponent's Wave can be activated indirectly, and it would inherit from its
 Wave would gain sideways steps, and also have movement direction swapped backwards,
 i.e. towards own initial positions.\newline
 \indent
-Here, dark Pawn is about to activate light Wave, indirectly, on its capture-field.
-
-\TODO :: Wave cannot activate Pyramid, only material pieces
+Here, dark Pawn is about to activate light Wave, indirectly, via dark Wave.
 
 \clearpage % ..........................................................
 
@@ -490,7 +526,9 @@ compare this pattern to light Wave
 \indent
 Note also that activated light Wave retains its behavior, and cannot activate dark
 pieces, only light ones; with the only exception being dark Wave. Wave can always
-activate any other Wave, regardless of colors.
+activate any other Wave, regardless of colors. Wave
+\hyperref[fig:scn_mv_009_not_activating_pyramid_by_wave]{cannot activate a Pyramid},
+regardless if own or opponent's.
 
 % .......................................... Activating opponent's Wave
 % ----------------------------------------------------- Activating Wave
@@ -504,45 +542,25 @@ activate any other Wave, regardless of colors.
 \vspace*{-1.4\baselineskip}
 \noindent
 \begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/12_n/scn_n_22_sideways_pawn_does_not_activate_pyramid.png}
+\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/12_n/scn_n_22_sideways_pawns_and_activating_pyramid.png}
 \vspace*{-1.3\baselineskip}
 \caption{Pyramid can't be activated}
-\label{fig:scn_n_22_sideways_pawn_does_not_activate_pyramid}
+\label{fig:scn_n_22_sideways_pawns_and_activating_pyramid}
 \end{figure}
 
-\TODO :: Wave cannot activate Pyramid, only material pieces
-
-\vspace*{-0.3\baselineskip}
-Image above and the next one both have two examples presented in parallel, on the
-top, and to the bottom.
+\vspace*{-0.5\baselineskip}
+Image above have two examples presented in parallel, on the top, and to the bottom.
 
 Pawn
 \hyperref[fig:scn_mv_009_not_activating_pyramid_by_wave]{cannot activate Pyramid on its step-fields},
-only on capture-fields.
-Since side fields are also step-fields, Pyramid can't be activated by a sideways
-moving Pawn, neither directly (top) nor indirectly (bottom), regardless how many
-Waves where used for indirection.
-
-\clearpage % ..........................................................
-
-\vspace*{-2.1\baselineskip}
-\noindent
-\begin{figure}[!h]
-\includegraphics[width=1.0\textwidth, keepaspectratio=true]{examples/12_n/scn_n_23_sideways_pawns_cascade_pyramids.png}
-\caption{Pyramids cascaded by sideways Pawns}
-\label{fig:scn_n_23_sideways_pawns_cascade_pyramids}
-\end{figure}
-
-\TODO :: Wave cannot activate Pyramid, only material pieces
+only on capture-fields. Since side fields are step-fields, Pyramid can't be
+activated by a sideways moving Pawn.
 
 Similarly
 \hyperref[fig:scn_mv_010_activating_pyramid_cascade_pawn]{to previous example},
-Pyramid can be activated if last active piece is not step-field moving Pawn, even
-if cascade contains one.
-
-Here, both cascades contain step-field moving Pawns, but last active pieces in both
-cases are Bishops. Both Bishops can activate Pyramids, regardless if it's directly
-(bottom), or indirectly, via Wave (top).
+Pyramid can be activated if activating piece (here, light Bishop) is moving over
+its capture-fields; even if cascade contains Pawns, Waves moving over their
+step-fields.
 
 % -------------------------------------------------- Activating Pyramid
 % ****************************************************** Sideways Pawns

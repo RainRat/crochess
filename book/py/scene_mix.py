@@ -38,15 +38,14 @@ class SceneMix( SceneMixin, \
     # overrides
     def _get_recent_scene_method_names( self ):
         return  [
-                    # 'scn_mv_009_not_activating_pyramid_by_wave', \
-                    # 'scn_mv_010_activating_pyramid_cascade_pawn', \
-                    # 'scn_mv_025_wave_activation_by_step_pawn', \
-                    # 'scn_mv_026_wave_activated_by_step_pawn', \
-                    # 'scn_mv_027_wave_activation_by_capture_pawn', \
-                    # 'scn_mv_028_wave_activated_by_capture_pawn', \
-                    # 'scn_mv_078_activating_opponents_wave', \
-                    # 'scn_mv_079_activated_opponents_wave', \
-                    # 'scn_n_04_teleport_move_3', \
-                    # 'scn_n_05_teleport_end', \
-                    'scn_n_19_capture_pawn_activated_wave', \
+                    'scn_n_16_sideways_pawn', \
+                    'scn_n_17_sideways_pawn_cannot_activate_pyramid', \
+                    'scn_n_18_sideways_pawn_can_activate_wave', \
+                    # 'scn_n_16_sideways_pawn_init', \
+                    # 'scn_n_17_sideways_pawn_activated_wave', \
+                    # 'scn_n_18_capture_pawn_init', \
+                    # 'scn_n_19_capture_pawn_activated_wave', \
+                    # 'scn_n_20_activating_opponents_wave', \
+                    # 'scn_n_21_activated_opponents_wave', \
+                    # 'scn_n_22_sideways_pawns_and_activating_pyramid', \
                 ]
