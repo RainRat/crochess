@@ -684,63 +684,127 @@ class SceneHemerasDawnMixin:
         return scene
 
     #
-    # Activating Scout
+    # Activating Pyramid
 
-    def scn_hd_23_activating_scout(self, bt=BoardType.HemerasDawn):
+    def scn_hd_23_activating_pyramid(self, bt=BoardType.HemerasDawn):
 
-        scene = Scene( 'scn_hd_23_activating_scout', bt, height=11 ) # width=8
+        scene = Scene( 'scn_hd_23_activating_pyramid', bt, height=8.3 ) # width=8
 
-        start_Q = (18, 1)
-        scene.board.set_piece( *start_Q, piece=PieceType.Queen )
-
-        start_W_A = (7, 1)
-        scene.board.set_piece( *start_W_A, piece=PieceType.Wave )
-
-        start_O = (10, 4)
+        start_O = (10, 2)
         scene.board.set_piece( *start_O, piece=PieceType.Scout )
 
-        start_A = (11, 3)
-        scene.board.set_piece( *start_A, piece=PieceType.Pyramid )
+        start_A_A = (11, 1)
+        scene.board.set_piece( *start_A_A, piece=PieceType.Pyramid )
 
-        start_W_B = (6, 4)
-        scene.board.set_piece( *start_W_B, piece=PieceType.Wave )
+        start_A_B = (7, 2)
+        scene.board.set_piece( *start_A_B, piece=PieceType.Pyramid )
 
-        start_W_C = (17, 4)
-        scene.board.set_piece( *start_W_C, piece=PieceType.Wave )
-
-        # Q --> W(A)
-        gen_Q_WA = GS.gen_steps( start=start_Q, rels=[ (-1, 0), ], include_prev=True, count=11 )
-        for i, arr in enumerate( gen_Q_WA() ):
+        # O --> (right)
+        gen_O_r = GS.gen_steps( start=start_O, rels=[ (1, 0), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_r() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # W(A) --> O
-        gen_WA_O = GS.gen_steps( start=start_W_A, rels=[ (1, 1), ], include_prev=True, count=3 )
-        for i, arr in enumerate( gen_WA_O() ):
+        # O --> (forward)
+        gen_O_f = GS.gen_steps( start=start_O, rels=[ (0, 1), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_f() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # O --> W(B)
-        gen_O_WB = GS.gen_steps( start=start_O, rels=[ (-1, 0), ], include_prev=True, count=5 )
-        for i, arr in enumerate( gen_O_WB() ):
-            mt_O_WB = MarkType.Action if i == 3 else \
-                      MarkType.Legal
-            scene.append_arrow( *arr, mark_type=mt_O_WB )
+        # O --> (left)
+        gen_O_AB = GS.gen_steps( start=start_O, rels=[ (-1, 0), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_AB() ):
+            mt_O_AB = MarkType.Legal if i < 2 else \
+                      MarkType.Illegal if i == 2 else \
+                      MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_O_AB )
 
-        # O --> W(C)
-        gen_O_WC = GS.gen_steps( start=start_O, rels=[ (1, 0), ], include_prev=True, count=5 )
-        for i, arr in enumerate( gen_O_WC() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Legal )
+        end_ = (9, 1)
 
-        # O -->
-        gen_O_ = GS.gen_steps( start=start_O, rels=[ (0, 1), ], include_prev=True, count=5 )
-        for i, arr in enumerate( gen_O_() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Legal )
+        scene.append_arrow( *( start_O + start_A_A ), mark_type=MarkType.Action )
+        # scene.append_arrow( *( start_O + end_ ), mark_type=MarkType.Illegal )
 
-        # O --> A
-        scene.append_arrow( *( start_O + start_A ), mark_type=MarkType.Action )
+        scene.append_text( "A", *start_A_A, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Action )
+        scene.append_text( "B", *start_A_B, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Illegal )
+        # scene.append_text( "C", *end_, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Illegal )
 
-        scene.append_text( "A", *start_W_A, corner=Corner.UpperLeft, mark_type=MarkType.Legal )
-        scene.append_text( "B", *start_W_B, corner=Corner.UpperLeft, mark_type=MarkType.Action )
-        scene.append_text( "C", *start_W_C, corner=Corner.UpperLeft, mark_type=MarkType.Illegal )
+        return scene
+
+    #
+    # Activating Scout
+
+    def scn_hd_24_activating_scout_init(self, bt=BoardType.HemerasDawn):
+
+        scene = Scene( 'scn_hd_24_activating_scout_init', bt, height=6.3 ) # width=8
+
+        start_Q = (6, 4)
+        scene.board.set_piece( *start_Q, piece=PieceType.Queen )
+
+        start_W = (8, 4)
+        scene.board.set_piece( *start_W, piece=PieceType.Wave )
+
+        start_O = (10, 2)
+        scene.board.set_piece( *start_O, piece=PieceType.Scout )
+
+        # Q --> W
+        gen_Q_W = GS.gen_steps( start=start_Q, rels=[ (1, 0), ], include_prev=True, count=2 )
+        for i, arr in enumerate( gen_Q_W() ):
+            mt_Q_W = MarkType.Legal if i < 1 else \
+                     MarkType.Action if i == 1 else \
+                     MarkType.Illegal
+            scene.append_arrow( *arr, mark_type=mt_Q_W )
+
+        # W --> O
+        gen_W_O = GS.gen_steps( start=start_W, rels=[ (1, -1), ], include_prev=True, count=2 )
+        for i, arr in enumerate( gen_W_O() ):
+            mt_W_O = MarkType.Action if i == 1 else \
+                     MarkType.Legal
+            scene.append_arrow( *arr, mark_type=mt_W_O )
+
+        return scene
+
+    def scn_hd_25_activating_scout_end(self, bt=BoardType.HemerasDawn):
+
+        scene = Scene( 'scn_hd_25_activating_scout_end', bt, height=8.3 ) # width=8
+
+        prev_Q = (6, 4)
+        prev_W = (8, 4)
+        prev_O = (10, 2)
+
+        start_Q = prev_W
+        scene.board.set_piece( *start_Q, piece=PieceType.Queen )
+
+        start_W = prev_O
+        scene.board.set_piece( *start_W, piece=PieceType.Wave )
+
+        start_O = prev_O
+        # scene.board.set_piece( *start_O, piece=PieceType.Scout )
+
+        # O --> (left)
+        gen_O_l = GS.gen_steps( start=start_O, rels=[ (-1, 0), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_l() ):
+            mt_O_l = MarkType.Legal if i < 2 else \
+                     MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_O_l )
+
+        # O --> (forward)
+        gen_O_f = GS.gen_steps( start=start_O, rels=[ (0, 1), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_f() ):
+            mt_O_f = MarkType.Legal if i < 2 else \
+                     MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_O_f )
+
+        # O --> (right)
+        gen_O_r = GS.gen_steps( start=start_O, rels=[ (1, 0), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_O_r() ):
+            mt_O_r = MarkType.Legal if i < 2 else \
+                     MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_O_r )
+
+        adder = GS.adder( start_O, include_prev=False )
+        end_O_bl = adder( -1, -1, do_advance=False )
+        end_O_br = adder(  1, -1, do_advance=False )
+
+        scene.append_arrow( *( start_O + end_O_bl ), mark_type=MarkType.Illegal )
+        scene.append_arrow( *( start_O + end_O_br ), mark_type=MarkType.Illegal )
 
         return scene
 
