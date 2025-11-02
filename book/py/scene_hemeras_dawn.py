@@ -450,9 +450,6 @@ class SceneHemerasDawnMixin:
         start_O_1 = (6, 2)
         scene.board.set_piece( *start_O_1, piece=PieceType.Scout )
 
-        start_p = (5, 1)
-        scene.board.set_piece( *start_p, piece=-PieceType.Pawn )
-
         start_n = (7, 1)
         scene.board.set_piece( *start_n, piece=-PieceType.Knight )
 
@@ -461,9 +458,6 @@ class SceneHemerasDawnMixin:
 
         start_B = (12, 7)
         scene.board.set_piece( *start_B, piece=PieceType.Bishop )
-
-        start_R = (14, 7)
-        scene.board.set_piece( *start_R, piece=PieceType.Rook )
 
         #
         # <-- <- O -> -->
@@ -480,7 +474,7 @@ class SceneHemerasDawnMixin:
         for i, arr in enumerate( arr() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        scene.append_arrow( *GS.append_pos_rel( start_O_1, -1, -1 ), mark_type=MarkType.Action )
+        scene.append_arrow( *GS.append_pos_rel( start_O_1, -1, -1 ), mark_type=MarkType.Illegal )
         scene.append_arrow( *GS.append_pos_rel( start_O_1, 1, -1 ), mark_type=MarkType.Action )
 
         #
@@ -499,7 +493,7 @@ class SceneHemerasDawnMixin:
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
         scene.append_arrow( *GS.append_pos_rel( start_o_1, -1, 1 ), mark_type=MarkType.Action )
-        scene.append_arrow( *GS.append_pos_rel( start_o_1, 1, 1 ), mark_type=MarkType.Action )
+        scene.append_arrow( *GS.append_pos_rel( start_o_1, 1, 1 ), mark_type=MarkType.Illegal )
 
         return scene
 
@@ -809,11 +803,11 @@ class SceneHemerasDawnMixin:
         return scene
 
     #
-    # Activating Wave, Pyramid
+    # Activating Wave
 
-    def scn_hd_24_scout_activating_wave_step_fields_init(self, bt=BoardType.HemerasDawn):
+    def scn_hd_26_scout_activating_wave_step_fields_init(self, bt=BoardType.HemerasDawn):
 
-        scene = Scene('scn_hd_24_scout_activating_wave_step_fields_init', bt)
+        scene = Scene('scn_hd_26_scout_activating_wave_step_fields_init', bt)
 
         start_W = (9, 7)
         scene.board.set_piece( *start_W, piece=PieceType.Wave )
@@ -843,14 +837,14 @@ class SceneHemerasDawnMixin:
                      MarkType.Legal
             scene.append_arrow( *arr, mark_type=mt_O_W )
 
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_25_scout_activating_wave_step_fields_end(self, bt=BoardType.HemerasDawn):
+    def scn_hd_27_scout_activating_wave_step_fields_end(self, bt=BoardType.HemerasDawn):
 
-        scene = Scene('scn_hd_25_scout_activating_wave_step_fields_end', bt)
+        scene = Scene('scn_hd_27_scout_activating_wave_step_fields_end', bt)
 
         prev_W = (9, 7)
         start_W = prev_W
@@ -906,33 +900,17 @@ class SceneHemerasDawnMixin:
         for i, arr in enumerate( gen_W_5() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # W --> * --> P -->
-        start_ = (9, 18)
-
-        gen_W_6 = GS.gen_steps( start=start_, rels=[ (-1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_6() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_7 = GS.gen_steps( start=start_, rels=[ (1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_7() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_8 = GS.gen_steps( start=start_, rels=[ (-1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_8() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_9 = GS.gen_steps( start=start_, rels=[ (1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_9() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_26_scout_activating_wave_capture_fields_init(self, bt=BoardType.HemerasDawn):
+    #
+    # Activating Wave on capture-fields
 
-        scene = Scene('scn_hd_26_scout_activating_wave_capture_fields_init', bt)
+    def scn_hd_28_scout_activating_wave_capture_fields_init(self, bt=BoardType.HemerasDawn):
+
+        scene = Scene('scn_hd_28_scout_activating_wave_capture_fields_init', bt)
 
         start_W = (9, 7)
         scene.board.set_piece( *start_W, piece=PieceType.Wave )
@@ -963,14 +941,14 @@ class SceneHemerasDawnMixin:
         #     scene.append_arrow( *arr, mark_type=mt_O_W )
         scene.append_arrow( *( start_O + start_W ), mark_type=MarkType.Action )
 
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_27_scout_activating_wave_capture_fields_end(self, bt=BoardType.HemerasDawn):
+    def scn_hd_29_scout_activating_wave_capture_fields_end(self, bt=BoardType.HemerasDawn):
 
-        scene = Scene('scn_hd_27_scout_activating_wave_capture_fields_end', bt)
+        scene = Scene('scn_hd_29_scout_activating_wave_capture_fields_end', bt)
 
         prev_W = (9, 7)
         start_W = prev_W
@@ -1016,7 +994,7 @@ class SceneHemerasDawnMixin:
         # W --> (diagonal left back)
         gen_W_4 = GS.gen_steps( start=start_W, rels=[ (-1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
         for i, arr in enumerate( gen_W_4() ):
-            mt_4 = MarkType.Action if i == 2 else \
+            mt_4 = MarkType.Blocked if i == 2 else \
                    MarkType.Action if i == 5 else \
                    MarkType.Legal
             scene.append_arrow( *arr, mark_type=mt_4 )
@@ -1026,33 +1004,14 @@ class SceneHemerasDawnMixin:
         for i, arr in enumerate( gen_W_5() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # W --> * --> P -->
-        start_ = (9, 18)
-
-        gen_W_6 = GS.gen_steps( start=start_, rels=[ (-1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_6() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_7 = GS.gen_steps( start=start_, rels=[ (1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_7() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_8 = GS.gen_steps( start=start_, rels=[ (-1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_8() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        gen_W_9 = GS.gen_steps( start=start_, rels=[ (1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_9() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_28_scout_en_passant(self, bt=BoardType.HemerasDawn):
+    def scn_hd_30_scout_en_passant(self, bt=BoardType.HemerasDawn):
 
-        scene = Scene('scn_hd_28_scout_en_passant', bt, width=5, height=10.7)
+        scene = Scene('scn_hd_30_scout_en_passant', bt, width=5, height=10.7)
 
         start_P = (2, 1)
         scene.board.set_piece( *start_P, piece=PieceType.Pawn )
