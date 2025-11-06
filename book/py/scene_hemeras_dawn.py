@@ -1139,9 +1139,9 @@ class SceneHemerasDawnMixin:
     #
     # Forking steps
 
-    def scn_hd_43_forking_steps( self, bt=BoardType.HemerasDawn ):
+    def scn_hd_43_grenadier_forking_steps( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_43_forking_steps', bt, width=7, height=7 )
+        scene = Scene( 'scn_hd_43_grenadier_forking_steps', bt, width=7, height=7 )
 
         start_G = (3, 3)
         scene.board.set_piece( *start_G, piece=PieceType.Grenadier )
@@ -1400,7 +1400,7 @@ class SceneHemerasDawnMixin:
 
     def scn_hd_50_grenadier_activated( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_50_grenadier_activated', bt, width=7, height=5 )
+        scene = Scene( 'scn_hd_50_grenadier_activated', bt, width=7.3, height=5.3 )
 
         start_N = (6, 1)
         scene.board.set_piece( *start_N, piece=PieceType.Knight )
@@ -1447,7 +1447,7 @@ class SceneHemerasDawnMixin:
 
     def scn_hd_51_grenadier_close_quarters_activation( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_51_grenadier_close_quarters_activation', bt, y=2, height=5 )
+        scene = Scene( 'scn_hd_51_grenadier_close_quarters_activation', bt, y=2, height=5.3 )
 
         start_E = (1, 2)
         scene.board.set_piece( *start_E, piece=PieceType.Pegasus )
@@ -1490,7 +1490,7 @@ class SceneHemerasDawnMixin:
 
     def scn_hd_52_grenadier_close_quarters_activated( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_52_grenadier_close_quarters_activated', bt, y=2, height=5 )
+        scene = Scene( 'scn_hd_52_grenadier_close_quarters_activated', bt, y=2, height=5.3 )
 
         prev_E = (1, 2)
         prev_W = (7, 5)
@@ -1570,9 +1570,141 @@ class SceneHemerasDawnMixin:
 
         return scene
 
-    def scn_hd_53_grenadier_activating_wave_step_field( self, bt=BoardType.HemerasDawn ):
+    #
+    # Activating Pyramid
 
-        scene = Scene( 'scn_hd_53_grenadier_activating_wave_step_field', bt )
+    def scn_hd_53_grenadier_activates_pyramid( self, bt=BoardType.HemerasDawn ):
+
+        scene = Scene( 'scn_hd_53_grenadier_activates_pyramid', bt, width=7.3, height=5.3 )
+
+        start_A_A = (1, 2)
+        scene.board.set_piece( *start_A_A, piece=PieceType.Pyramid )
+
+        start_A_B = (4, 1)
+        scene.board.set_piece( *start_A_B, piece=PieceType.Pyramid )
+
+        start_G = (3, 2)
+        scene.board.set_piece( *start_G, piece=PieceType.Grenadier )
+
+        # gen_Gr_ = GS.gen_steps( start=start_G, rels=[ (1, 0), ], include_prev=True, count=3 )
+        # for i, arr in enumerate( gen_Gr_() ):
+        #     # mt_r = MarkType.Legal if i < 1 else \
+        #     #        MarkType.Blocked
+        #     scene.append_arrow( *arr, mark_type=MarkType.Legal )
+
+        # gen_Gu_ = GS.gen_steps( start=start_G, rels=[ (0, 1), ], include_prev=True, count=2 )
+        # for i, arr in enumerate( gen_Gu_() ):
+        #     # mt_u = MarkType.Legal if i < 1 else \
+        #     #        MarkType.Blocked
+        #     scene.append_arrow( *arr, mark_type=MarkType.Legal )
+
+        gen_Gl_ = GS.gen_steps( start=start_G, rels=[ (-1, 0), ], include_prev=True, count=3 )
+        for i, arr in enumerate( gen_Gl_() ):
+            mt_l = MarkType.Legal if i < 1 else \
+                   MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_l )
+
+        # gen_Gd_ = GS.gen_steps( start=start_G, rels=[ (0, -1), ], include_prev=True, count=2 )
+        # for i, arr in enumerate( gen_Gd_() ):
+        #     # mt_d = MarkType.Legal if i < 1 else \
+        #     #        MarkType.Blocked
+        #     scene.append_arrow( *arr, mark_type=MarkType.Legal )
+
+        scene.append_arrow( *( start_G + start_A_B ), mark_type=MarkType.Action )
+
+        # scene.append_arrow( *GS.append_pos_rel( start_G, 1, 1 ), mark_type=MarkType.Illegal )
+        # scene.append_arrow( *GS.append_pos_rel( start_G, -1, 1 ), mark_type=MarkType.Illegal )
+        # scene.append_arrow( *GS.append_pos_rel( start_G, -1, -1 ), mark_type=MarkType.Illegal )
+        # scene.append_arrow( *GS.append_pos_rel( start_G, 1, -1 ), mark_type=MarkType.Action )
+
+        scene.append_text( "A", *start_A_A, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Blocked )
+        scene.append_text( "B", *start_A_B, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Action )
+
+        return scene
+
+    def scn_hd_54_grenadier_close_quarters_activates_pyramid( self, bt=BoardType.HemerasDawn ):
+
+        scene = Scene( 'scn_hd_54_grenadier_close_quarters_activates_pyramid', bt, y=2, height=5.3 )
+
+        start_G = (9, 4)
+        scene.board.set_piece( *start_G, piece=PieceType.Grenadier )
+
+        start_n = (10, 5)
+        scene.board.set_piece( *start_n, piece=-PieceType.Knight )
+
+        start_w = (10, 4)
+        scene.board.set_piece( *start_w, piece=-PieceType.Wave )
+
+        start_r = (8, 5)
+        scene.board.set_piece( *start_r, piece=-PieceType.Rook )
+
+        start_p = (9, 3)
+        scene.board.set_piece( *start_p, piece=-PieceType.Pawn )
+
+        start_A_A = (13, 3)
+        scene.board.set_piece( *start_A_A, piece=PieceType.Pyramid )
+
+        start_A_B = (6, 4)
+        scene.board.set_piece( *start_A_B, piece=PieceType.Pyramid )
+
+        start_A_C = (8, 3)
+        scene.board.set_piece( *start_A_C, piece=PieceType.Pyramid )
+
+        gen_Gr_ = GS.gen_steps( start=start_G, rels=[ (1, 0), ], include_prev=True, count=3 )
+        for i, arr in enumerate( gen_Gr_() ):
+            mt_r = MarkType.Blocked if i == 0 else \
+                   MarkType.Legal
+            scene.append_arrow( *arr, mark_type=mt_r )
+
+            mt_rd_c = MarkType.Action if i == 2 else \
+                      MarkType.Illegal
+            # scene.append_arrow( *GS.add_end_rel( arr, 1, 1 ), mark_type=MarkType.Illegal )
+
+            if i == 2:
+                scene.append_arrow( *GS.add_end_rel( arr, 1, -1 ), mark_type=mt_rd_c )
+
+        # gen_Gu_ = GS.gen_steps( start=start_G, rels=[ (0, 1), ], include_prev=True, count=1 )
+        # for i, arr in enumerate( gen_Gu_() ):
+        #     scene.append_arrow( *arr, mark_type=MarkType.Legal )
+
+        #     # scene.append_arrow( *GS.add_end_rel( arr, 1, 1 ), mark_type=MarkType.Illegal )
+        #     # scene.append_arrow( *GS.add_end_rel( arr, -1, 1 ), mark_type=MarkType.Illegal )
+
+        gen_Gl_ = GS.gen_steps( start=start_G, rels=[ (-1, 0), ], include_prev=True, count=5 )
+        for i, arr in enumerate( gen_Gl_() ):
+            mt_l = MarkType.Legal if i < 2 else \
+                   MarkType.Blocked
+            scene.append_arrow( *arr, mark_type=mt_l )
+
+            # mt_l_c = MarkType.Illegal if i < 2 else \
+            #          MarkType.Blocked
+            # scene.append_arrow( *GS.add_end_rel( arr, -1, 1 ), mark_type=mt_l_c )
+            # scene.append_arrow( *GS.add_end_rel( arr, -1, -1 ), mark_type=mt_l_c )
+
+        # gen_Gd_ = GS.gen_steps( start=start_G, rels=[ (0, -1), ], include_prev=True, count=1 )
+        # for i, arr in enumerate( gen_Gd_() ):
+        #     scene.append_arrow( *arr, mark_type=MarkType.Legal )
+
+        #     # scene.append_arrow( *GS.add_end_rel( arr, -1, -1 ), mark_type=MarkType.Illegal )
+        #     # scene.append_arrow( *GS.add_end_rel( arr, 1, -1 ), mark_type=MarkType.Action )
+
+        # scene.append_arrow( *GS.append_pos_rel( start_G, 1, 1 ), mark_type=MarkType.Action )
+        # scene.append_arrow( *GS.append_pos_rel( start_G, -1, 1 ), mark_type=MarkType.Action )
+        scene.append_arrow( *GS.append_pos_rel( start_G, -1, -1 ), mark_type=MarkType.Action )
+        # scene.append_arrow( *GS.append_pos_rel( start_G, 1, -1 ), mark_type=MarkType.Illegal )
+
+        scene.append_text( "A", *start_A_A, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Action )
+        scene.append_text( "B", *start_A_B, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Blocked )
+        scene.append_text( "C", *start_A_C, corner=Corner.UpperRightFieldMarker, mark_type=MarkType.Action )
+
+        return scene
+
+    #
+    # Activating Wave
+
+    def scn_hd_55_grenadier_activating_wave_step_field( self, bt=BoardType.HemerasDawn ):
+
+        scene = Scene( 'scn_hd_55_grenadier_activating_wave_step_field', bt )
 
         start_G = (9, 5)
         scene.board.set_piece( *start_G, piece=PieceType.Grenadier )
@@ -1602,14 +1734,14 @@ class SceneHemerasDawnMixin:
                      MarkType.Legal
             scene.append_arrow( *arr, mark_type=mt_G_W )
 
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_54_grenadier_activated_wave_step_field( self, bt=BoardType.HemerasDawn ):
+    def scn_hd_56_grenadier_activated_wave_step_field( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_54_grenadier_activated_wave_step_field', bt )
+        scene = Scene( 'scn_hd_56_grenadier_activated_wave_step_field', bt )
 
         prev_G = (9, 2)
         prev_W = (9, 7)
@@ -1680,21 +1812,17 @@ class SceneHemerasDawnMixin:
         for i, arr in enumerate( gen_Wbr_() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # W --> * --> P -->
-        start_ = (9, 18)
-
-        gen_W_P_ = GS.gen_steps( start=start_, rels=[ (-1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_P_() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_55_grenadier_activating_wave_capture_field( self, bt=BoardType.HemerasDawn ):
+    #
+    # Activating Wave on capture-fields
 
-        scene = Scene( 'scn_hd_55_grenadier_activating_wave_capture_field', bt )
+    def scn_hd_57_grenadier_activating_wave_capture_field( self, bt=BoardType.HemerasDawn ):
+
+        scene = Scene( 'scn_hd_57_grenadier_activating_wave_capture_field', bt )
 
         start_n = (7, 9)
         scene.board.set_piece( *start_n, piece=-PieceType.Knight )
@@ -1728,14 +1856,17 @@ class SceneHemerasDawnMixin:
         start_ = (8, 8) # == start_G + (2, 0)
         scene.append_arrow( *GS.append_pos_rel( start_, 1, -1 ), mark_type=MarkType.Action )
 
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_56_grenadier_activated_wave_capture_field( self, bt=BoardType.HemerasDawn ):
+    #
+    # Activating Wave on capture-fields
 
-        scene = Scene( 'scn_hd_56_grenadier_activated_wave_capture_field', bt )
+    def scn_hd_58_grenadier_activated_wave_capture_field( self, bt=BoardType.HemerasDawn ):
+
+        scene = Scene( 'scn_hd_58_grenadier_activated_wave_capture_field', bt )
 
         start_n = (7, 9)
         scene.board.set_piece( *start_n, piece=-PieceType.Knight )
@@ -1760,7 +1891,7 @@ class SceneHemerasDawnMixin:
         start_N = (3, 1)
         scene.board.set_piece( *start_N, piece=PieceType.Knight )
 
-        start_P = (7, 18)
+        start_P = (7, 16)
         scene.board.set_piece( *start_P, piece=PieceType.Pawn )
 
         # W --> (right)
@@ -1796,7 +1927,8 @@ class SceneHemerasDawnMixin:
         # W --> (diagonal left back)
         gen_Wbl_ = GS.gen_steps( start=start_W, rels=[ (-1, -1), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
         for i, arr in enumerate( gen_Wbl_() ):
-            mt = MarkType.Action if i in [2, 5] else \
+            mt = MarkType.Blocked if i == 2 else \
+                 MarkType.Action if i == 5 else \
                  MarkType.Legal
             scene.append_arrow( *arr, mark_type=mt )
 
@@ -1810,21 +1942,14 @@ class SceneHemerasDawnMixin:
         for i, arr in enumerate( gen_Wbr_() ):
             scene.append_arrow( *arr, mark_type=MarkType.Legal )
 
-        # W --> * --> P -->
-        start_ = (9, 18)
-
-        gen_W_P_ = GS.gen_steps( start=start_, rels=[ (-1, 0), ], include_prev=True, bounds=scene.board_view.get_position_limits() )
-        for i, arr in enumerate( gen_W_P_() ):
-            scene.append_arrow( *arr, mark_type=MarkType.Illegal )
-
-        scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
-        scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "A", *start_A_A, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
+        # scene.append_text( "B", *start_A_B, corner=Corner.UpperLeft, mark_type=MarkType.Blocked )
 
         return scene
 
-    def scn_hd_57_grenadier_en_passant( self, bt=BoardType.HemerasDawn ):
+    def scn_hd_59_grenadier_en_passant( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_57_grenadier_en_passant', bt, width=8, height=10.3 )
+        scene = Scene( 'scn_hd_59_grenadier_en_passant', bt, width=8, height=10.3 )
 
         #
         # A
@@ -1872,9 +1997,9 @@ class SceneHemerasDawnMixin:
 
         return scene
 
-    def scn_hd_58_grenadier_en_passant_self_extended( self, bt=BoardType.HemerasDawn ):
+    def scn_hd_60_grenadier_en_passant_self_extended( self, bt=BoardType.HemerasDawn ):
 
-        scene = Scene( 'scn_hd_58_grenadier_en_passant_self_extended', bt, width=8, height=10.3 )
+        scene = Scene( 'scn_hd_60_grenadier_en_passant_self_extended', bt, width=8, height=10.3 )
 
         #
         # 1
