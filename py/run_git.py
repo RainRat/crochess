@@ -5,7 +5,7 @@
 # Licensed under GNU GPL v3+ license. See LICENSING, COPYING files for details.
 
 
-def split_cmd_git_args(argv):
+def split_cmd_git_args( argv ):
     arg_sep_count = 0 # 0 --> script argv, 1 --> git commit argv, 2 --> git push argv
     git_commit_args = False
     git_push_args = False
@@ -14,7 +14,7 @@ def split_cmd_git_args(argv):
     git_commit_argv = []
     git_push_argv = []
 
-    for index, arg in enumerate(argv):
+    for index, arg in enumerate( argv ):
         if arg != '-*-':
             if index > 0: # index == 0 --> arg == '.../crochess/push.py', i.e. executing script, not an argument
                 a = arg
@@ -26,7 +26,7 @@ def split_cmd_git_args(argv):
                 elif arg_sep_count == 2:
                     git_push_argv.append( a )
                 else:
-                    raise RuntimeError("Too many arg groups, expected: script.py <args> -*- <git commit args> -*- <git push args>,\nin cmd line: '%s'." % argv)
+                    raise RuntimeError( "Too many arg groups, expected: script.py <args> -*- <git commit args> -*- <git push args>,\nin cmd line: '%s'." % argv )
         else:
             arg_sep_count += 1
 
@@ -45,12 +45,12 @@ def split_cmd_git_args(argv):
 
     return (pre_git_argv, git_commit_argv, git_push_argv)
 
-def is_committing_all_files(git_commit_argv):
+def is_committing_all_files( git_commit_argv ):
     if not git_commit_argv:
         return False
 
     for arg in git_commit_argv:
-        if arg.startswith('-') and not arg.startswith('--') and 'a' in arg:
+        if arg.startswith( '-') and not arg.startswith('--' ) and 'a' in arg:
             # Skip: --amend, --allow-empty, --allow-empty-message.
             return True
         elif arg == '--all':
@@ -58,7 +58,7 @@ def is_committing_all_files(git_commit_argv):
 
     return False
 
-def is_committing_specified_files(git_commit_argv):
+def is_committing_specified_files( git_commit_argv ):
     if not git_commit_argv:
         return False
 

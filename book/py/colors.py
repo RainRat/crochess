@@ -95,7 +95,7 @@ class ColorsMark:
         self.action = action
         self.blocked = blocked
 
-    def as_tuple(self):
+    def as_tuple( self ):
         return self.legal.as_tuple() + \
                self.illegal.as_tuple() + \
                self.action.as_tuple() + \
@@ -126,7 +126,7 @@ class ColorsMarkSimple:
         self.action = action
         self.blocked = blocked
 
-    def as_tuple(self):
+    def as_tuple( self ):
         return self.legal.as_tuple() + \
                self.illegal.as_tuple() + \
                self.action.as_tuple() + \
@@ -330,11 +330,11 @@ class Colors( dict ):
                                             field=CS(    ('#501008', '#501008', '#909090', '#909090') ), \
                                             arrow=CMS(   ('#00FF00', '#000000', '#FF0000', '#000000', \
                                                           '#0000FF', '#000000', '#E0E0E0', '#000000') ), \
-                                            text=CM(     ('#00FF00', '#000000', '#00FF00', '#000000', \
+                                            text=CM(     ('#00FF00', '#000000', '#007F00', '#000000', \
                                                           '#FF0000', '#000000', '#FF0000', '#000000', \
                                                           '#9090FF', '#000000', '#0000FF', '#000000', \
                                                           '#E0E0E0', '#000000', '#101010', '#000000') ), \
-                                            marker=CM(   ('#00FF00', '#000000', '#00FF00', '#000000', \
+                                            marker=CM(   ('#00FF00', '#000000', '#007F00', '#000000', \
                                                           '#FF0000', '#000000', '#FF0000', '#000000', \
                                                           '#0000FF', '#000000', '#0000FF', '#000000', \
                                                           '#E0E0E0', '#000000', '#101010', '#000000') ) ) # BFBFBF
@@ -426,7 +426,7 @@ class Colors( dict ):
 
     # TODO :: FIX :: in text / <action> light and dark interiors are switched, test on Hemera's Dawn
 
-    def fetch_colors(self, bt, enforce_bw=False):
+    def fetch_colors( self, bt, enforce_bw=False ):
         if enforce_bw:
             return self[ BoardType.Classical ]
 

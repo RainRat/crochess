@@ -794,10 +794,10 @@ This is no longer so for newly added pieces. For instance, Serpent can have mult
 paths leading to the same destination; even though a single path cannot contain loops
 different paths can overlap, and they can have different lengths.
 
-In \hyperref[fig:scn_tr_05_serpent_end]{this Serpent's movement example}, assuming that
-starting position is \alg{c3}, and destination \alg{g3}, depicted complete path is
-\alg{Sc3.d4.c5.d6.e5.f6.g5.f4.g3}. Even with as few steps as possible, to have unique path
-it would still need to be written as \alg{S..d6..f6..g3}.
+In \hyperref[fig:scn_tr_05_serpent_end]{this Serpent's movement example}, starting
+position is \alg{c3}, and destination \alg{g3}, depicted complete path is
+\alg{Sc3.d4.c5.d6.e5.f6.g5.f4.g3}. Even with as few steps as possible, to have
+unique path it would still need to be written as \alg{S..d6..f6..g3}.
 
 However, one of the shortest paths (here, e.g.\newline
 \alg{Sc3.d4.e3.f4.g3}) would result in exactly the same outcome, namely Serpent moved from
@@ -1679,14 +1679,11 @@ any\footnotemark[1]                     & any                           & own Wa
 \multirow{2}{*}{Wave}                   & \multirow{2}{*}{any}          & opponent's Wave, any own      \\
                                         &                               & except King, Pyramid          \\
 \cmidrule{1-3} % .........................................................................................
-\multirow{2}{*}{Wave\footnotemark[2]}   & \multirow{2}{*}{capture-}     & opponent's Wave, any          \\
-                                        &                               & own except King               \\
-\cmidrule{1-3} % .........................................................................................
 Shaman                                  & trance-                       & any Shaman, Starchild         \\
 Starchild                               & step-                         & own Wave, Starchild           \\
 Starchild                               & miracle-                      & any Star                      \\
 \cmidrule{1-3} % .........................................................................................
-\multirow{2}{*}{Starchild}              & \multirow{2}{*}{uplifting-}   & any\footnotemark[3] except King, Wave, \\
+\multirow{2}{*}{Starchild}              & \multirow{2}{*}{uplifting-}   & any\footnotemark[2] except King, Wave, \\
                                         &                               & Monolith, any Star            \\
 \bottomrule % ============================================================================================
 \end{tabular}
@@ -1695,8 +1692,7 @@ Starchild                               & miracle-                      & any St
 \end{table}
 
 \footnotetext[1]{Any piece, except Stars, Monolith.}
-\footnotetext[2]{If activated on capture-fields.}
-\footnotetext[3]{Uplifted Starchild cannot take sense-journey, only uplift other piece.}
+\footnotetext[2]{Uplifted Starchild cannot take sense-journey, only uplift other piece.}
 
 Activated own piece means it belongs to the same player (light or dark) as activating
 piece, otherwise it's opponent's piece. Activated pieces labeled as any can be either
@@ -1705,8 +1701,6 @@ own or opponent's.\newline
 For instance, any piece can activate own Wave, but only Wave can activate opponent's
 Wave. Another example, Shaman can entrance any Shaman, Starchild, i.e. either own
 or opponent's.
-
-\TODO :: Wave cannot activate Pyramid, only material pieces
 
 \clearpage % ..........................................................
 
@@ -1969,26 +1963,18 @@ present.
                                                         \cmidrule{3-4} % .............................................
                             &                           & \emph{any}\footnotemark[1]    & \emph{last}               \\
 \midrule % -----------------------------------------------------------------------------------------------------------
-\multirow{5}{*}{Wave}       & \multirow{5}{*}{step\footnotemark[2]-}
+\multirow{5}{*}{Wave}       & \parbox[b][1pt][s]{7ex}{~\vspace*{0.7\baselineskip}\\step-,\\capture-} % \multirow{5}{*}{step\footnotemark[2]-}
                                                         &                               & step, teleport,           \\
                             &                           & step,                         & activate any              \\
                             &                           & transparency,                 & Wave, own                 \\
-                            &                           & divergence\footnotemark[5]    & pieces except             \\
+                            &                           & divergence\footnotemark[3]    & pieces except             \\
                             &                           &                               & King, Pyramid             \\
 \cmidrule{1-4} % .....................................................................................................
-\multirow{5}{*}{Wave}       & \multirow{5}{*}{capture\footnotemark[3]-}
-                                                        &                               & step, teleport,           \\
-                            &                           & step,                         & activate any              \\
-                            &                           & transparency,                 & Wave, own                 \\
-                            &                           & divergence\footnotemark[5]    & pieces except             \\
-                            &                           &                               & King                      \\
-\cmidrule{1-4} % .....................................................................................................
-\multirow{5}{*}{Wave}       & \multirow{5}{*}{miracle\footnotemark[4]-}
-                                                        & \multirow{5}{*}{---}          & step, teleport,           \\
+\multirow{4}{*}{Wave}       & \multirow{4}{*}{step\footnotemark[2]-}
+                                                        & \multirow{4}{*}{---}          & step, teleport,           \\
                             &                           &                               & activate any              \\
                             &                           &                               & Wave, own                 \\
-                            &                           &                               & pieces except             \\
-                            &                           &                               & King                      \\
+                            &                           &                               & Starchild                 \\
 \cmidrule{1-4} % .....................................................................................................
 Star                        & step-                     & ---                           & step                      \\
 % \cmidrule{1-4} % .....................................................................................................
@@ -1999,18 +1985,14 @@ Star                        & step-                     & ---                   
 \end{table}
 
 \footnotetext[1]{Any step, except the last one.}
-\footnotetext[2]{Activated on a step-field.}
-\footnotetext[3]{Activated on a capture--field.}
-\footnotetext[4]{Activated on a miracle-field.}
-\footnotetext[5]{Cannot diverge if activated by Unicorn, Centaur, or Serpent.}
+\footnotetext[2]{Activated by a Starchild.}
+\footnotetext[3]{Cannot diverge if activated by Unicorn, Centaur, or Serpent.}
 
-Wave cannot capture, and so all fields it's traversing are actually step-fields.
+Wave cannot capture, and so all fields it's traversing are actually step-fields.\newline
+\indent
 In the table above, \emph{fields} column for Wave notes over which kind of fields
-activating piece was traveling. For instance, if activated by rushing Pawn, Wave
-cannot activate Pyramid, because rushing Pawn moves over its own step-fields, and
-so first row applies.
-
-\TODO :: Wave cannot activate Pyramid, only material pieces
+activating piece was traveling; Wave behaves the same, regardless on which field
+it was activated.
 
 \clearpage % ..........................................................
 
@@ -2380,20 +2362,17 @@ teleporting piece (Star) is introduced.
                       | <new-active-figure>
                       | <passive-figure>
 
-<activateable-piece> =
-  <activateable-figure> | <pawn>
-
 <disposable-figure> =
 <promote-to-figure> =
   <activateable-figure>
+
+<disposable-piece> =
+  <disposable-figure> | <pawn>
 \end{alltt}
 
 \clearpage % ..........................................................
 
 \begin{alltt}
-<disposable-piece> =
-  <disposable-figure> | <pawn>
-
 <piece-transparent-to-wave> =
   <disposable-piece> | \alg{K} | \alg{T}
 
@@ -2417,41 +2396,34 @@ teleporting piece (Star) is introduced.
   <losing-rushing-tag>
 | <losing-promotion-tag>
 
-<figure-losing-tag> =
-  \alg{R}<losing-castling-tag>
-| <trooper><losing-rushing-tag>
+<pawn-losing-tag> = <pawn>[<losing-pawn-tag>]
 
-<active-figure-losing-tag> =
+<private-losing-tag> =
+  <pawn-losing-tag>
+| <trooper>[<losing-rushing-tag>]
+
+<active-piece-losing-tag> =
   <active-figure>
-| <figure-losing-tag>
+| \alg{R}[<losing-castling-tag>]
+| <private-losing-tag>
 \end{alltt}
 
 \clearpage % ..........................................................
 
 \begin{alltt}
-<active-piece-losing-tag> =
-  <active-figure-losing-tag>
-| <pawn>[<losing-pawn-tag>]
-
 <capturing-active-figure-losing-tag> =
   <capturing-active-figure>
-| <figure-losing-tag>
-
-<capturing-active-piece-losing-tag> =
-  <capturing-active-figure-losing-tag>
-| <pawn>[<losing-pawn-tag>]
+| \alg{R}[<losing-castling-tag>]
+| <trooper>[<losing-rushing-tag>]
 
 <capturing-piece-losing-tag> =
-  <capturing-active-piece-losing-tag>
-| <capturing-piece>
-
-<activateable-figure-losing-tag> =
-  <activateable-figure>
-| <capturing-active-figure-losing-tag>
+  <capturing-active-figure-losing-tag>
+| <pawn-losing-tag>
 
 <activateable-piece-losing-tag> =
-  <activateable-figure-losing-tag>
-| <pawn>[<losing-pawn-tag>]
+  <activateable-figure>
+| <capturing-active-figure-losing-tag>
+| <pawn-losing-tag>
 
 <disposable-figure-losing-tag> =
   <disposable-figure>
@@ -2459,21 +2431,21 @@ teleporting piece (Star) is introduced.
 
 <disposable-piece-losing-tag> =
   <disposable-figure-losing-tag>
-| <pawn>[<losing-pawn-tag>]
+| <pawn-losing-tag>
 
 <capturing-side-effect> =
   [\alg{*}[<disposable-piece-losing-tag>]]
-\end{alltt}
 
-\clearpage % ..........................................................
-
-\begin{alltt}
 <en-passant-side-effect> =
   [\alg{:}[[<private>](<rank> | <field>)]]
 
 <castling-side-effect> =
   \alg{&}[[\alg{R}](<file> | <field>)]
+\end{alltt}
 
+\clearpage % ..........................................................
+
+\begin{alltt}
 <promoting-side-effect> =
   [\alg{=}]<promote-to-figure>
 
@@ -2484,7 +2456,7 @@ teleporting piece (Star) is introduced.
 | \alg{%%}
 
 <pawn-displacement-side-effect> =
-  \alg{<}<pawn>[<losing-pawn-tag>]<disambiguation>
+  \alg{<}<pawn-losing-tag><disambiguation>
 
 <displacement-side-effect> =
   \alg{<}[<disposable-piece-losing-tag>]<field>
@@ -2501,16 +2473,16 @@ teleporting piece (Star) is introduced.
     <disambiguation>
 | \alg{>}<disposable-figure-losing-tag>
     [<disambiguation>]
+
+<resurrecting-side-effect> =
+  \alg{$}[\alg{$}]<disposable-piece>
+| \alg{$}[\alg{$}](\alg{W}|\alg{I})<field>
+| [\alg{$$$}]
 \end{alltt}
 
 \clearpage % ..........................................................
 
 \begin{alltt}
-<resurrecting-side-effect> =
-  \alg{$}[\alg{$}]<disposable-piece>
-| \alg{$}[\alg{$}](\alg{W}|\alg{I})<field>
-| [\alg{$$$}]
-
 <stepping-no-side-effects> =
   [<disambiguation>]<field>
 | [<disambiguation>]\{<step>\}[\alg{-}<field>]
@@ -2519,37 +2491,36 @@ teleporting piece (Star) is introduced.
 <stepping> =
   <stepping-no-side-effects>
 | [<disambiguation>]
-  \{<step>[<transparency-side-effect>
-          | <divergence-side-effect>]\}
+  \{<step>[ <transparency-side-effect>
+          | <divergence-side-effect> ]\}
   (<step> | \alg{-}<field>)
 
 <wave-stepping> =
   <stepping-no-side-effects>
 | [<disambiguation>]
-  \{<step>[<wave-transparency-side-effect>
-          | <divergence-side-effect>]\}
+  \{<step>[ <wave-transparency-side-effect>
+          | <divergence-side-effect> ]\}
   (<step> | \alg{-}<field>)
 
 <serpent-stepping> =
   <stepping-no-side-effects>
 | [<disambiguation>]
-  \{<step>[<pawn-displacement-side-effect>
-          | <transparency-side-effect>]\}
+  \{<step>[ <pawn-displacement-side-effect>
+          | <transparency-side-effect> ]\}
   (<step> | \alg{-}<field>)
 
+<shaman-stepping> =
+  <stepping-no-side-effects>
+| [<disambiguation>]
+  \{<step>[ <transparency-side-effect>
+          | <divergence-side-effect>
+          | <capturing-side-effect> ]\}
+  (<step> | \alg{-}<field>)
 \end{alltt}
 
 \clearpage % ..........................................................
 
 \begin{alltt}
-<shaman-stepping> =
-  <stepping-no-side-effects>
-| [<disambiguation>]
-  \{<step>[<transparency-side-effect>
-          | <divergence-side-effect>
-          | <capturing-side-effect>]\}
-  (<step> | \alg{-}<field>)
-
 <pawn-promotion-ply> =
   <pawn>[<losing-promotion-tag>]<stepping>
   (<promoting-side-effect>
@@ -2572,6 +2543,8 @@ teleporting piece (Star) is introduced.
   \alg{|}[<disposable-piece>]<field>
 | \alg{||}[<disposable-piece>]<field>
 | \alg{|||}[<disposable-piece>]
+
+<pyramid-cascading-plies> = \{\alg{~A}<stepping>\}
 \end{alltt}
 
 \clearpage % ..........................................................
@@ -2587,10 +2560,46 @@ teleporting piece (Star) is introduced.
             | <pawn-displacement-side-effect>
             | <transparency-side-effect>]\}
 | \alg{S}<stepping-no-side-effects>
+  [<pyramid-cascading-plies>]
 
 <pawn-sacrifice-ply> =
   <pawn-sacrifice-init>
   [<pawn-sacrifice-steps>]
+
+<trance-journey-init> =
+  \alg{H}<stepping-no-side-effects>
+
+<journey-start> =
+  [<disambiguation>][\alg{\textbackslash}<field>]
+
+<trance-journey> =
+  <trance-journey-init>\alg{@H}<journey-start>
+  \{<step>
+    [(\alg{<}[<disposable-piece-losing-tag>]<field>
+      | \alg{*}[<disposable-piece-losing-tag>])]\}
+| <trance-journey-init>\alg{@H}
+    [<disambiguation>]<field>
+| <trance-journey-init>\alg{@@}
+  [<disposable-piece-losing-tag>[<field>]
+    [\{,<disposable-piece-losing-tag>
+      [<field>]\}]]
+| <trance-journey-init>\alg{@@@}[\alg{H}]
+\end{alltt}
+
+\clearpage % ..........................................................
+
+\begin{alltt}
+<sense-journey-init> =
+  (\alg{I}|\alg{H})<stepping-no-side-effects>
+  \alg{~I}<stepping-no-side-effects>
+
+<sense-journey> =
+  <sense-journey-init>\alg{"}
+  <activateable-piece-losing-tag>
+  <journey-start>
+  <stepping-no-side-effects>
+| <sense-journey-init>\alg{'}
+  [<activateable-piece-losing-tag>]
 
 <starting-ply> =
   <active-piece-losing-tag><stepping>
@@ -2603,11 +2612,9 @@ teleporting piece (Star) is introduced.
 | <pawn-sacrifice-ply>
 
 <cascading-plies> =
-  [\{(\alg{~W}<wave-stepping> | \alg{~A}<stepping>)\}]
+  [\{\alg{~A}<stepping>\}]
   \{\alg{~W}<wave-stepping>\}
-  [ [\{((\alg{~}|\alg{|})\alg{W}<wave-stepping>
-       | \alg{~A}<stepping>)\}]
-    \{(\alg{~}|\alg{|})\alg{W}<wave-stepping>\} ]
+  [\{(\alg{~}|\alg{|})\alg{W}<wave-stepping>\}]
 \end{alltt}
 
 \clearpage % ..........................................................
@@ -2615,19 +2622,23 @@ teleporting piece (Star) is introduced.
 \begin{alltt}
 <stand-alone-ply> =
   <capturing-piece-losing-tag><stepping>
-  [(<capturing-side-effect>
-    | <teleportation-ply>)]
+  [ ( <capturing-side-effect>
+    | <teleportation-ply>
+    | <pyramid-cascading-plies> ) ]
 | <private-losing-tag><stepping>
-  [(<en-passant-side-effect>
-    | <teleportation-ply>)]
+  [<en-passant-side-effect>]
 | \alg{S}<serpent-stepping>
-  [(<capturing-side-effect>
-    | <teleportation-ply>)]
+  [ ( <capturing-side-effect>
+    | <teleportation-ply>
+    | <pyramid-cascading-plies> ) ]
 | \alg{H}<shaman-stepping>
-  [(<capturing-side-effect>
-    | <teleportation-ply>)]
+  [ ( <capturing-side-effect>
+    | <teleportation-ply>
+    | <pyramid-cascading-plies> ) ]
 | <capturing-pawn-promotion-ply>
-| <pawn-sacrifice-ply>[<teleportation-ply>]
+| <pawn-sacrifice-ply>
+  [ ( <teleportation-ply>
+    | <pyramid-cascading-plies> ) ]
 
 <terminating-ply> =
   <stand-alone-ply>
@@ -2643,41 +2654,6 @@ teleporting piece (Star) is introduced.
 | <pawn-promotion-ply>
 | <passive-piece><stepping>
 | <pawn-sacrifice-ply>
-\end{alltt}
-
-\clearpage % ..........................................................
-
-\begin{alltt}
-<trance-journey-init> =
-  \alg{H}<stepping-no-side-effects>
-
-<journey-start> =
-  [<disambiguation>][\alg{\textbackslash}<field>]
-
-<trance-journey> =
-  <trance-journey-init>\alg{@H}<journey-start>
-  \{<step>
-    [(\alg{<}[<disposable-piece-losing-tag>]<field>
-      | \alg{*}[<disposable-piece-losing-tag>)]\}
-| <trance-journey-init>\alg{@H}
-    [<disambiguation>]<field>
-| <trance-journey-init>\alg{@@}
-  [<disposable-piece-losing-tag>[<field>]
-    [\{,<disposable-piece-losing-tag>
-      [<field>]\}]]
-| <trance-journey-init>\alg{@@@}[\alg{H}]
-
-<sense-journey-init> =
-  (\alg{I}|\alg{H})<stepping-no-side-effects>
-  \alg{~I}<stepping-no-side-effects>
-
-<sense-journey> =
-  <sense-journey-init>\alg{"}
-  <activateable-piece-losing-tag>
-  <journey-start>
-  <stepping-no-side-effects>
-| <sense-journey-init>\alg{'}
-  [<activateable-piece-losing-tag>]
 \end{alltt}
 
 \clearpage % ..........................................................
@@ -2773,8 +2749,6 @@ chessboard position. So, defining entities and values which are externally depen
 is not really possible. For instance, entranced Shamans behave differently in a
 trance-journey depending if initiating Shaman was light or dark; the former would
 displace encountered pieces, while the latter would capture them.
-
-\TODO :: Wave cannot activate Pyramid, only material pieces
 
 \clearpage % ..........................................................
 % ---------------------------------------------------- Appendix chapter

@@ -10,7 +10,7 @@ from utils import gen_next, iterate, xor
 from corner import Corner
 
 
-def convert_single_step_into_multi_rels(rels):
+def convert_single_step_into_multi_rels( rels ):
     return [ [ tpl ] for tpl in rels ]
 
 
@@ -18,13 +18,13 @@ DEFAULT_MONOLITH_REL_LEFT_MOVES = [ ( 2,  1),  \
                                     (-1,  2),  \
                                     (-2, -1),  \
                                     ( 1, -2)   ]
-DEFAULT_MONOLITH_MULTI_REL_LEFT_MOVES = convert_single_step_into_multi_rels(DEFAULT_MONOLITH_REL_LEFT_MOVES)
+DEFAULT_MONOLITH_MULTI_REL_LEFT_MOVES = convert_single_step_into_multi_rels( DEFAULT_MONOLITH_REL_LEFT_MOVES )
 
 DEFAULT_MONOLITH_REL_RIGHT_MOVES = [ ( 1,  2),  \
                                      (-2,  1),  \
                                      (-1, -2),  \
                                      ( 2, -1)   ]
-DEFAULT_MONOLITH_MULTI_REL_RIGHT_MOVES = convert_single_step_into_multi_rels(DEFAULT_MONOLITH_REL_RIGHT_MOVES)
+DEFAULT_MONOLITH_MULTI_REL_RIGHT_MOVES = convert_single_step_into_multi_rels( DEFAULT_MONOLITH_REL_RIGHT_MOVES )
 
 DEFAULT_KNIGHT_REL_MOVES = [ ( 2,  1),  \
                              ( 1,  2),  \
@@ -37,25 +37,25 @@ DEFAULT_KNIGHT_REL_MOVES = [ ( 2,  1),  \
                                         \
                              ( 1, -2),  \
                              ( 2, -1)   ]
-DEFAULT_KNIGHT_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_KNIGHT_REL_MOVES)
+DEFAULT_KNIGHT_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_KNIGHT_REL_MOVES )
 
 DEFAULT_CENTAUR_SHORT_I_III_REL_MOVES =   [ ( 2,  1),  \
                                             ( 1,  2),  \
                                                        \
                                             (-2, -1),  \
                                             (-1, -2),  ]
-DEFAULT_CENTAUR_SHORT_I_III_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_SHORT_I_III_REL_MOVES)
+DEFAULT_CENTAUR_SHORT_I_III_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_SHORT_I_III_REL_MOVES )
 
 DEFAULT_CENTAUR_SHORT_II_IV_REL_MOVES =   [ (-1,  2),  \
                                             (-2,  1),  \
                                                        \
                                             ( 1, -2),  \
                                             ( 2, -1)   ]
-DEFAULT_CENTAUR_SHORT_II_IV_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_SHORT_II_IV_REL_MOVES)
+DEFAULT_CENTAUR_SHORT_II_IV_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_SHORT_II_IV_REL_MOVES )
 
 DEFAULT_CENTAUR_SHORT_REL_MOVES = DEFAULT_CENTAUR_SHORT_I_III_REL_MOVES \
                                 + DEFAULT_CENTAUR_SHORT_II_IV_REL_MOVES
-DEFAULT_CENTAUR_SHORT_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_SHORT_REL_MOVES)
+DEFAULT_CENTAUR_SHORT_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_SHORT_REL_MOVES )
 
 DEFAULT_UNICORN_REL_LONG_MOVES = [ ( 4,  1),    \
                                    ( 3,  2),    \
@@ -76,7 +76,7 @@ DEFAULT_UNICORN_REL_LONG_MOVES = [ ( 4,  1),    \
                                    ( 2, -3),    \
                                    ( 3, -2),    \
                                    ( 4, -1)     ]
-DEFAULT_UNICORN_MULTI_REL_LONG_MOVES = convert_single_step_into_multi_rels(DEFAULT_UNICORN_REL_LONG_MOVES)
+DEFAULT_UNICORN_MULTI_REL_LONG_MOVES = convert_single_step_into_multi_rels( DEFAULT_UNICORN_REL_LONG_MOVES )
 
 DEFAULT_CENTAUR_LONG_I_III_REL_MOVES =    [ ( 4,  1),    \
                                             ( 3,  2),    \
@@ -87,7 +87,7 @@ DEFAULT_CENTAUR_LONG_I_III_REL_MOVES =    [ ( 4,  1),    \
                                             (-3, -2),    \
                                             (-2, -3),    \
                                             (-1, -4),    ]
-DEFAULT_CENTAUR_LONG_I_III_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_LONG_I_III_REL_MOVES)
+DEFAULT_CENTAUR_LONG_I_III_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_LONG_I_III_REL_MOVES )
 
 DEFAULT_CENTAUR_LONG_II_IV_REL_MOVES =    [ (-1,  4),    \
                                             (-2,  3),    \
@@ -98,17 +98,17 @@ DEFAULT_CENTAUR_LONG_II_IV_REL_MOVES =    [ (-1,  4),    \
                                             ( 2, -3),    \
                                             ( 3, -2),    \
                                             ( 4, -1)     ]
-DEFAULT_CENTAUR_LONG_II_IV_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_LONG_II_IV_REL_MOVES)
+DEFAULT_CENTAUR_LONG_II_IV_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_LONG_II_IV_REL_MOVES )
 
 DEFAULT_CENTAUR_LONG_REL_MOVES  = DEFAULT_CENTAUR_LONG_I_III_REL_MOVES \
                                 + DEFAULT_CENTAUR_LONG_II_IV_REL_MOVES
-DEFAULT_CENTAUR_LONG_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_CENTAUR_LONG_REL_MOVES)
+DEFAULT_CENTAUR_LONG_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_CENTAUR_LONG_REL_MOVES )
 
 DEFAULT_ROOK_REL_MOVES = [  ( 1,  0), \
                             ( 0,  1), \
                             (-1,  0), \
                             ( 0, -1)  ]
-DEFAULT_ROOK_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_ROOK_REL_MOVES)
+DEFAULT_ROOK_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_ROOK_REL_MOVES )
 
 DEFAULT_KING_REL_MOVES = [ ( 1,  0), \
                            ( 1,  1), \
@@ -121,19 +121,19 @@ DEFAULT_KING_REL_MOVES = [ ( 1,  0), \
 
                            ( 0, -1), \
                            ( 1, -1)  ]
-DEFAULT_KING_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_KING_REL_MOVES)
+DEFAULT_KING_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_KING_REL_MOVES )
 
 DEFAULT_BISHOP_REL_MOVES = [ ( 1,  1), \
                              (-1,  1), \
                              (-1, -1), \
                              ( 1, -1)  ]
-DEFAULT_BISHOP_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_BISHOP_REL_MOVES)
+DEFAULT_BISHOP_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_BISHOP_REL_MOVES )
 
 
 # left turning --> spiraling right
 LIGHT_SHAMAN_REL_MOVES = [ ( 2,  1), \
                            (-2, -1), ]
-LIGHT_SHAMAN_MULTI_REL_MOVES = convert_single_step_into_multi_rels(LIGHT_SHAMAN_REL_MOVES)
+LIGHT_SHAMAN_MULTI_REL_MOVES = convert_single_step_into_multi_rels( LIGHT_SHAMAN_REL_MOVES )
 
 LIGHT_SHAMAN_REL_LEGS_LEFT =  [ (-1,  0), \
                                 (-1, -1), \
@@ -183,7 +183,7 @@ LIGHT_SHAMAN_CORNER_RIGHT_FIELD_MARKER =  [ Corner.LowerRightFieldMarker, \
 # right turning --> spiraling left
 DARK_SHAMAN_REL_MOVES = [ ( 1,  2), \
                           (-1, -2), ]
-DARK_SHAMAN_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DARK_SHAMAN_REL_MOVES)
+DARK_SHAMAN_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DARK_SHAMAN_REL_MOVES )
 
 DARK_SHAMAN_REL_LEGS_UP = [ ( 0,  1), \
                             ( 1,  1), \
@@ -288,82 +288,82 @@ DEFAULT_DISPLACEMENT_REL_MOVES =  [ (  3,   1),  \
                                     (  4,  -4),  \
                                     (  5,  -3),  \
                                     (  6,  -2)   ]
-DEFAULT_DISPLACEMENT_MULTI_REL_MOVES = convert_single_step_into_multi_rels(DEFAULT_DISPLACEMENT_REL_MOVES)
+DEFAULT_DISPLACEMENT_MULTI_REL_MOVES = convert_single_step_into_multi_rels( DEFAULT_DISPLACEMENT_REL_MOVES )
 
 
-def separate_poss(arrow):
+def separate_poss( arrow ):
     x0, y0, x1, y1 = arrow
     return (x0, y0), (x1, y1)
 
-def combine_poss(start, end):
+def combine_poss( start, end ):
     # x0, y0 = start
     # x1, y1 = end
     # return (x0, y0, x1, y1)
     return start + end
 
 
-def add_rel(pos, rel_x, rel_y):
+def add_rel( pos, rel_x, rel_y ):
     if pos is None or rel_x is None or rel_y is None:
         return None
     return ( pos[0] + rel_x, pos[1] + rel_y )
 
-def sub_rel(pos, rel_x, rel_y):
+def sub_rel( pos, rel_x, rel_y ):
     if pos is None or rel_x is None or rel_y is None:
         return None
     return ( pos[0] - rel_x, pos[1] - rel_y )
 
-def append_pos(pos, x, y):
+def append_pos( pos, x, y ):
     if pos is None or x is None or y is None:
         return None
     return ( pos[0], pos[1], x, y )
 
-def append_pos_rel(pos, rel_x, rel_y):
+def append_pos_rel( pos, rel_x, rel_y ):
     if pos is None or rel_x is None or rel_y is None:
         return None
     return ( pos[0], pos[1], pos[0] + rel_x, pos[1] + rel_y )
 
-def prepend_pos_rel(rel_x, rel_y, pos):
+def prepend_pos_rel( rel_x, rel_y, pos ):
     if pos is None or rel_x is None or rel_y is None:
         return None
     return ( pos[0] - rel_x, pos[1] - rel_y, pos[0], pos[1] )
 
-def add_step(pos, step):
+def add_step( pos, step ):
     if pos is None or step is None:
         return None
     return ( pos[0] + step[0], pos[1] + step[1] )
 
-def sub_step(pos, step):
+def sub_step( pos, step ):
     if pos is None or step is None:
         return None
     return ( pos[0] - step[0], pos[1] - step[1] )
 
-def get_start(arrow):
+def get_start( arrow ):
     return (arrow[0], arrow[1])
 
-def get_end(arrow):
+def get_end( arrow ):
     return (arrow[2], arrow[3])
 
-def add_end_rel(arrow, rel_x, rel_y):
+def add_end_rel( arrow, rel_x, rel_y ):
     x0, y0, x1, y1 = arrow
     return (x1, y1, x1 + rel_x, y1 + rel_y)
 
-def sub_end_rel(arrow, rel_x, rel_y):
+def sub_end_rel( arrow, rel_x, rel_y ):
     x0, y0, x1, y1 = arrow
     return (x1, y1, x1 - rel_x, y1 - rel_y)
 
-def add_arrow_rel(arrow, rel_x, rel_y):
+def add_arrow_rel( arrow, rel_x, rel_y ):
     x0, y0, x1, y1 = arrow
     return (x0 + rel_x, y0 + rel_y, x1 + rel_x, y1 + rel_y)
 
 
-def adder(pos, include_prev=False):
+def adder( pos, include_prev=False ):
     _current = pos
     _next = pos
 
-    def _adder(rel_i, rel_j, do_advance=True):
+    def _adder( rel_i, rel_j, do_advance=True ):
         nonlocal _current, _next
         _current = _next
-        _n = add_step(_current, (rel_i, rel_j))
+        _n = add_step( _current, (rel_i, rel_j) )
         if do_advance:
             _next = _n
 
@@ -374,62 +374,62 @@ def adder(pos, include_prev=False):
     return _adder
 
 
-def remove(coords, to_remove=[]):
+def remove( coords, to_remove=[] ):
     return [ pos for pos in coords if pos not in to_remove ] # preserves order
 
-def linear_all(coords, factor, offset):
-    t = type(coords)
+def linear_all( coords, factor, offset ):
+    t = type( coords )
     c = [ factor * x + offset for x in coords ]
     return t(c)
 
-def multiply_all(coords, factor):
-    t = type(coords)
+def multiply_all( coords, factor ):
+    t = type( coords )
     c = [ factor * x for x in coords ]
     return t(c)
 
-def add_to_all(coords, offset):
-    t = type(coords)
+def add_to_all( coords, offset ):
+    t = type( coords )
     c = [ x + offset for x in coords ]
     return t(c)
 
-def negate(coords):
-    t = type(coords)
+def negate( coords ):
+    t = type( coords )
     c = [ (-x) for x in coords ]
     return t(c)
 
 
-def check_valid(bounds=None, func=None):
+def check_valid( bounds=None, func=None ):
     # bounds :: ((i_min, j_min), (i_max, j_max)) # ((0, 0), (25, 25))
     #
     # func :: pos --> bool
     #         pos :: (i ,j)
 
-    def _check_valid(pos):
+    def _check_valid( pos ):
         # pos :: (int, int) # (i, j)
 
         if pos is None:
             return None
 
         if bounds is not None:
-            l = len(pos) - 2
+            l = len( pos ) - 2
             i = pos[0 + l]
             j = pos[1 + l]
 
             i_min, j_min = bounds[0]
             i_max, j_max = bounds[1]
 
-            if (i < i_min) or (i_max < i) or (j < j_min) or (j_max < j):
+            if ( i < i_min) or (i_max < i) or (j < j_min) or (j_max < j ):
                 return False
 
         if func is not None:
-            if not func(pos):
+            if not func( pos ):
                 return False
 
         return True
 
     return _check_valid
 
-def gen_items(items, count=None):
+def gen_items( items, count=None ):
     # items :: generator
     #       || [ a, b, c, ... ] # e.g. [ (i, j), ... ]
     #
@@ -439,7 +439,7 @@ def gen_items(items, count=None):
     def _gen_items():
         i = 0
         while count is None or i < count:
-            if callable(items):
+            if callable( items ):
                 for item in items():
                     if count is None or i < count:
                         yield item
@@ -456,7 +456,7 @@ def gen_items(items, count=None):
 
     return _gen_items
 
-def gen_steps(rels, start=None, end=None, include_prev=False, include_start=False, bounds=None, func_valid=None, count=None):
+def gen_steps( rels, start=None, end=None, include_prev=False, include_start=False, bounds=None, func_valid=None, count=None ):
     # rels :: generator
     #      ||  [ (i, j), ... ]
     #
@@ -465,7 +465,7 @@ def gen_steps(rels, start=None, end=None, include_prev=False, include_start=Fals
     # func_valid :: pos --> bool
     #               pos :: (i ,j)
 
-    assert xor(start is not None, end is not None)
+    assert xor( start is not None, end is not None )
 
     def _gen_steps():
         _reverse = start is None
@@ -474,15 +474,15 @@ def gen_steps(rels, start=None, end=None, include_prev=False, include_start=Fals
         if include_start and not include_prev:
             yield _current
 
-        _rels = rels if callable(rels) else gen_items(rels, count=count)
-        _valid = check_valid(bounds=bounds, func=func_valid)
+        _rels = rels if callable( rels) else gen_items(rels, count=count )
+        _valid = check_valid( bounds=bounds, func=func_valid )
 
         for _rel in _rels():
             if _reverse:
-                _rel = negate(_rel)
-            _prev = _next = add_step(_current, _rel)
+                _rel = negate( _rel )
+            _prev = _next = add_step( _current, _rel )
 
-            if not _valid(_next):
+            if not _valid( _next ):
                 break
 
             if include_prev:
@@ -497,7 +497,7 @@ def gen_steps(rels, start=None, end=None, include_prev=False, include_start=Fals
 
     return _gen_steps
 
-def gen_multi_steps(multi_rels, start=None, end=None, include_prev=False, include_start=False, bounds=None, func_valid=None, count=None):
+def gen_multi_steps( multi_rels, start=None, end=None, include_prev=False, include_start=False, bounds=None, func_valid=None, count=None ):
     # multi_rels :: [ rels, ... ]
     #
     # rels :: generator
@@ -513,7 +513,7 @@ def gen_multi_steps(multi_rels, start=None, end=None, include_prev=False, includ
 
     def _gen_multi_steps():
         for rels in multi_rels:
-            _steps = gen_steps(rels, start=start, end=end, include_prev=include_prev, include_start=include_start, bounds=bounds, func_valid=func_valid, count=count)
+            _steps = gen_steps( rels, start=start, end=end, include_prev=include_prev, include_start=include_start, bounds=bounds, func_valid=func_valid, count=count )
 
             for _step in _steps():
                 if _step is None:
@@ -526,13 +526,13 @@ def gen_multi_steps(multi_rels, start=None, end=None, include_prev=False, includ
 #
 # shaman generators
 
-def gen_shaman_rel_legs(rel, count=None):
+def gen_shaman_rel_legs( rel, count=None ):
     # generate legs of relative steps
 
     start_horizontal = rel in LIGHT_SHAMAN_REL_MOVES
     start_vertical = rel in DARK_SHAMAN_REL_MOVES
 
-    assert xor(start_horizontal, start_vertical)
+    assert xor( start_horizontal, start_vertical )
 
     legs = None
 
@@ -555,7 +555,7 @@ def gen_shaman_rel_legs(rel, count=None):
         while loop:
             # legs :: [ (i, j), ... ]
             for leg in legs:
-                yield multiply_all(leg, length)
+                yield multiply_all( leg, length )
 
                 i += 1
                 if count is not None and count <= i:
@@ -567,16 +567,16 @@ def gen_shaman_rel_legs(rel, count=None):
 
     return _gen_legs
 
-def gen_shaman_rels(rel, count=None):
+def gen_shaman_rels( rel, count=None ):
 
-    g = gen_next( gen_shaman_rel_legs(rel, count=None) )
+    g = gen_next( gen_shaman_rel_legs( rel, count=None ) )
 
     def _gen_shaman_rels():
         i = 0
         while count is None or i < count:
             rel_1 = g()
             rel_2 = g()
-            rel_new = add_step(rel_1, rel_2)
+            rel_new = add_step( rel_1, rel_2 )
 
             if rel_new is None:
                 break
@@ -586,12 +586,12 @@ def gen_shaman_rels(rel, count=None):
 
     return _gen_shaman_rels
 
-def gen_shaman_corners(rel, count=None, is_with_field_marker=True):
+def gen_shaman_corners( rel, count=None, is_with_field_marker=True ):
 
     start_horizontal = rel in LIGHT_SHAMAN_REL_MOVES
     start_vertical = rel in DARK_SHAMAN_REL_MOVES
 
-    assert xor(start_horizontal, start_vertical)
+    assert xor( start_horizontal, start_vertical )
 
     corners = None
 
@@ -606,12 +606,12 @@ def gen_shaman_corners(rel, count=None, is_with_field_marker=True):
         else:
             corners = DARK_SHAMAN_CORNER_DOWN_FIELD_MARKER if is_with_field_marker else DARK_SHAMAN_CORNER_DOWN
 
-    return gen_items(corners, count=count)
+    return gen_items( corners, count=count )
 
 #
 # monolith generators
 
-def gen_monolith_default_steps(step_number):
+def gen_monolith_default_steps( step_number ):
 
     steps = []
 
@@ -674,15 +674,15 @@ def gen_monolith_default_steps(step_number):
 #
 # tests
 
-def test_print(gen, length=8, as_next=True):
+def test_print( gen, length=8, as_next=True ):
     if as_next:
-        g = gen_next(gen) # , default='pero'
+        g = gen_next( gen ) # , default='pero'
 
         print()
         print( "-" * 42 )
         print( g )
         # print()
-        for i in range(61):
+        for i in range( 61 ):
             if i % length == 0:
                 print()
             print( i, g() )
@@ -695,7 +695,7 @@ def test_print(gen, length=8, as_next=True):
         print( "-" * 42 )
         print( g )
         # print()
-        for i, t in enumerate(g()):
+        for i, t in enumerate( g() ):
             if i % length == 0:
                 print()
             print( i, t )
@@ -704,34 +704,34 @@ def test_print(gen, length=8, as_next=True):
         print( "-" * 42 )
         print()
 
-def test_1(as_next=True):
+def test_1( as_next=True ):
     # rels = [(3, 1), ]
     rels = DEFAULT_KNIGHT_REL_MOVES
     # rels = DEFAULT_UNICORN_REL_LONG_MOVES
     # rels = [(-2, 1), (3, 2)]
-    ln = len(rels)
+    ln = len( rels )
 
-    g = gen_items(rels, count=3)
+    g = gen_items( rels, count=3 )
     g = gen_items(g)
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_2(as_next=True):
+def test_2( as_next=True ):
     rels = [(-2, 1), (3, 2)]
-    ln = len(rels)
+    ln = len( rels )
     start = (7, 9)
     bounds = ((0, 0), (20, 20))
 
-    # g = gen_steps(rels, start=start, bounds=bounds)
-    # g = gen_steps(rels, start=start, include_prev=True, bounds=bounds)
-    g = gen_steps(rels, start=start, include_prev=True, count=2)
-    # g = gen_steps(rels, end=start, include_prev=True, bounds=bounds)
+    # g = gen_steps( rels, start=start, bounds=bounds )
+    # g = gen_steps( rels, start=start, include_prev=True, bounds=bounds )
+    g = gen_steps( rels, start=start, include_prev=True, count=2 )
+    # g = gen_steps( rels, end=start, include_prev=True, bounds=bounds )
 
     g = gen_items(g)
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_3(as_next=True):
+def test_3( as_next=True ):
     start = (7, 9)
 
     rel1 = [(-2, -1), (3, 2)]
@@ -739,84 +739,84 @@ def test_3(as_next=True):
     rel2 = [(2, 1), (1, 2), (-1, 2)]
     # rel1 = [(2, 1), ]
     # rel2 = [(3, 2), (-1, 4), ]
-    ln = len(rel1) + len(rel2)
+    ln = len( rel1) + len(rel2 )
 
     multi_rels = [ rel1, rel2 ]
     bounds = ((0, 0), (25, 25))
 
-    # g = gen_multi_steps(multi_rels, start=start)
-    # g = gen_multi_steps(multi_rels, start=start, include_prev=True, bounds=bounds)
-    g = gen_multi_steps(multi_rels, start=start, include_prev=True, count=2)
-    # g = gen_multi_steps(multi_rels, end=start, include_prev=True)
+    # g = gen_multi_steps( multi_rels, start=start )
+    # g = gen_multi_steps( multi_rels, start=start, include_prev=True, bounds=bounds )
+    g = gen_multi_steps( multi_rels, start=start, include_prev=True, count=2 )
+    # g = gen_multi_steps( multi_rels, end=start, include_prev=True )
 
     # g = gen_items(g)
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_4(as_next=False):
+def test_4( as_next=False ):
     start = (2, 2)
     bounds = ((0, 0), (4, 4))
-    ln = len(DEFAULT_KNIGHT_REL_MOVES)
+    ln = len( DEFAULT_KNIGHT_REL_MOVES )
 
     multi_rels = [ [t] for t in DEFAULT_KNIGHT_REL_MOVES ]
 
-    # g = gen_multi_steps(DEFAULT_KNIGHT_MULTI_REL_MOVES, start=start, bounds=bounds)
-    # g = gen_multi_steps(DEFAULT_KNIGHT_MULTI_REL_MOVES, start=start, include_prev=True, count=3)
-    g = gen_multi_steps(DEFAULT_KNIGHT_MULTI_REL_MOVES, end=start, include_prev=True, count=3)
+    # g = gen_multi_steps( DEFAULT_KNIGHT_MULTI_REL_MOVES, start=start, bounds=bounds )
+    # g = gen_multi_steps( DEFAULT_KNIGHT_MULTI_REL_MOVES, start=start, include_prev=True, count=3 )
+    g = gen_multi_steps( DEFAULT_KNIGHT_MULTI_REL_MOVES, end=start, include_prev=True, count=3 )
     # g = gen_items(g)
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_5(as_next=True):
+def test_5( as_next=True ):
     rel = (2, 1)
     ln = 2
 
-    g = gen_shaman_rel_legs(rel, count=21)
+    g = gen_shaman_rel_legs( rel, count=21 )
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_6(as_next=True):
+def test_6( as_next=True ):
     rel = (2, 1)
     ln = 8
 
-    g = gen_shaman_rels(rel, count=21)
+    g = gen_shaman_rels( rel, count=21 )
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_7(as_next=True):
+def test_7( as_next=True ):
     rel = (2, 1)
     ln = 8
 
     start = (7, 9)
     bounds = ((-42, -42), (99, 99)) # ((0, 0), (25, 25))
 
-    f = gen_shaman_rels(rel)
+    f = gen_shaman_rels( rel )
 
-    g = gen_steps(f, start=start, include_prev=False, bounds=bounds)
-    # g = gen_steps(f, start=start, bounds=bounds)
-    # g = gen_steps(f, start=start, include_prev=True, bounds=bounds)
-    # g = gen_steps(f, end=start, include_prev=True, bounds=bounds)
+    g = gen_steps( f, start=start, include_prev=False, bounds=bounds )
+    # g = gen_steps( f, start=start, bounds=bounds )
+    # g = gen_steps( f, start=start, include_prev=True, bounds=bounds )
+    # g = gen_steps( f, end=start, include_prev=True, bounds=bounds )
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
-def test_8(as_next=True):
+def test_8( as_next=True ):
     start = (7, 9)
     ln = 8
 
-    rel1 = gen_shaman_rels(LIGHT_SHAMAN_REL_MOVES[0])
-    rel2 = gen_shaman_rels(LIGHT_SHAMAN_REL_MOVES[1])
+    rel1 = gen_shaman_rels( LIGHT_SHAMAN_REL_MOVES[0] )
+    rel2 = gen_shaman_rels( LIGHT_SHAMAN_REL_MOVES[1] )
 
     multi_rels = [ rel1, rel2 ]
     bounds = ((-42, -42), (99, 99)) # ((0, 0), (25, 25))
 
-    # g = gen_multi_steps(multi_rels, start=start)
-    g = gen_multi_steps(multi_rels, start=start, include_prev=True, bounds=bounds)
-    # g = gen_multi_steps(multi_rels, start=start, include_prev=True, count=3)
-    # g = gen_multi_steps(multi_rels, end=start, include_prev=True, bounds=bounds)
+    # g = gen_multi_steps( multi_rels, start=start )
+    g = gen_multi_steps( multi_rels, start=start, include_prev=True, bounds=bounds )
+    # g = gen_multi_steps( multi_rels, start=start, include_prev=True, count=3 )
+    # g = gen_multi_steps( multi_rels, end=start, include_prev=True, bounds=bounds )
 
     g = gen_items(g)
 
-    test_print(g, length=ln, as_next=as_next)
+    test_print( g, length=ln, as_next=as_next )
 
 def test_monolith_gen():
     print()
@@ -827,28 +827,28 @@ def test_monolith_gen():
 
 
 if __name__ == '__main__':
-    # test_1(as_next=True)
-    # test_1(as_next=False)
+    # test_1( as_next=True )
+    # test_1( as_next=False )
 
-    # test_2(as_next=True)
-    # test_2(as_next=False)
+    # test_2( as_next=True )
+    # test_2( as_next=False )
 
-    # test_3(as_next=True)
-    # test_3(as_next=False)
+    # test_3( as_next=True )
+    # test_3( as_next=False )
 
-    # test_4(as_next=True)
-    # test_4(as_next=False)
+    # test_4( as_next=True )
+    # test_4( as_next=False )
 
-    # test_5(as_next=True)
-    # test_5(as_next=False)
+    # test_5( as_next=True )
+    # test_5( as_next=False )
 
-    # test_6(as_next=True)
-    # test_6(as_next=False)
+    # test_6( as_next=True )
+    # test_6( as_next=False )
 
-    test_7(as_next=True)
-    test_7(as_next=False)
+    test_7( as_next=True )
+    test_7( as_next=False )
 
-    # test_8(as_next=True)
-    # test_8(as_next=False)
+    # test_8( as_next=True )
+    # test_8( as_next=False )
 
     # test_monolith_gen()
