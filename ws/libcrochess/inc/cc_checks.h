@@ -28,6 +28,11 @@ bool cc_check_valid_draw_offer_exists( CcMove * moves,
 //
 // Piece checks
 
+// TODO :: DOCS
+bool cc_check_piece_can_step( CcPieceTagType ptt,
+                              CcStepTypeEnum step_type,
+                              bool strict_check );
+
 bool cc_check_piece_can_lose_tag( CcPieceTagType piece,
                                   CcLosingTagType ltt,
                                   bool compare_tag_and_losing_tag );
@@ -80,12 +85,23 @@ bool cc_check_castling_step_fields( CcChessboard * cb,
                                     CcPos rook_start,
                                     CcPos rook_dest );
 
+//
+// Finders
+
 bool cc_find_en_passant_target( CcChessboard * cb,
                                 CcPieceTagType capturing,
                                 CcActivationDesc act_desc,
                                 bool is_first_ply,
                                 CcPos destination,
                                 CcPosDesc * target__o );
+
+bool cc_find_first_piece( CcChessboard * cb,
+                          CcPieceTagType piece,
+                          CcPos start,
+                          CcPos step,
+                          bool check_start_pos,
+                          bool compare_tags,
+                          CcPosDesc * found__o );
 
 
 #endif /* __CC_CHECKS_H__ */

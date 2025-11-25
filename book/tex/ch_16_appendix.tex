@@ -1673,17 +1673,17 @@ under \emph{moving piece} column.
 \cmidrule{1-2} % .........................................................................................
 \emph{Piece}                            & \emph{At field}               &                               \\
 \midrule % -----------------------------------------------------------------------------------------------
-any\footnotemark[1]                     & capture-                      & own Pyramid                   \\
+any\footnotemark[1]                     & capture-                      & own Pyramid\footnotemark[2]   \\
 any\footnotemark[1]                     & any                           & own Wave                      \\
 \cmidrule{1-3} % .........................................................................................
-\multirow{2}{*}{Wave}                   & \multirow{2}{*}{any}          & opponent's Wave, any own      \\
+\multirow{2}{*}{Wave}                   & \multirow{2}{*}{any}          & opponent's Wave, any own\footnotemark[3] \\
                                         &                               & except King, Pyramid          \\
 \cmidrule{1-3} % .........................................................................................
 Shaman                                  & trance-                       & any Shaman, Starchild         \\
 Starchild                               & step-                         & own Wave, Starchild           \\
 Starchild                               & miracle-                      & any Star                      \\
 \cmidrule{1-3} % .........................................................................................
-\multirow{2}{*}{Starchild}              & \multirow{2}{*}{uplifting-}   & any\footnotemark[2] except King, Wave, \\
+\multirow{2}{*}{Starchild}              & \multirow{2}{*}{uplifting-}   & any\footnotemark[4] except King, Wave, \\
                                         &                               & Monolith, any Star            \\
 \bottomrule % ============================================================================================
 \end{tabular}
@@ -1692,15 +1692,20 @@ Starchild                               & miracle-                      & any St
 \end{table}
 
 \footnotetext[1]{Any piece, except Stars, Monolith.}
-\footnotetext[2]{Uplifted Starchild cannot take sense-journey, only uplift other piece.}
+\footnotetext[2]{Activating piece has to have momentum, i.e. $>0$.}
+\footnotetext[3]{Wave has to have momentum, if activating anything other than a Wave or Starchild.}
+\footnotetext[4]{Uplifted Starchild cannot take sense-journey, only uplift other piece.}
 
 Activated own piece means it belongs to the same player (light or dark) as activating
 piece, otherwise it's opponent's piece. Activated pieces labeled as any can be either
-own or opponent's.\newline
-\indent
+own or opponent's.
 For instance, any piece can activate own Wave, but only Wave can activate opponent's
 Wave. Another example, Shaman can entrance any Shaman, Starchild, i.e. either own
-or opponent's.
+or opponent's.\newline
+\indent
+Any piece, except Wave and Starchild, can be activated only if activating piece has
+momentum (i.e. if it's larger than 0); both Wave and Starchild do not spend their
+momentum when moving, and transfer it entirely to next piece in a cascade.
 
 \clearpage % ..........................................................
 
@@ -1757,8 +1762,8 @@ change its movement to horizontal once it started moving diagonally.
 
 Wave can take any initial step, even those activating piece could not. For instance,
 \hyperref[fig:scn_hd_27_scout_activating_wave_step_fields_end]{Wave activated by Scout}
-can take diagonal step, even if Scout itself would not be able to because diagonal
-field does not host opponent's piece.
+can take diagonal step, even if Scout itself would not be able to because e.g.
+diagonal field does not host opponent's piece.
 
 \hyperref[fig:scn_mv_031_wave_activation_by_unicorn_first_step]{Wave activated by Unicorn}
 moves similar to Centaur, it has to keep alternating between two initially chosen
@@ -1790,9 +1795,7 @@ but, only the former can activate Pyramids, if moving diagonally, over its
 capture-fields.
 
 \hyperref[fig:scn_hd_56_grenadier_activated_wave_step_field]{Wave activated by Grenadier}
-moves like a Queen; difference is that only diagonal steps are capture-steps, both
-horizontal and vertical steps are just movement steps.
-
+moves like a Queen.
 Wave cannot be activated by a Star or a Monolith. Wave can teleport, if activated
 by any piece, but Starchild. Wave activated by Starchild cannot neither teleport,
 nor activate a Star.
@@ -1814,6 +1817,90 @@ activated Wave, and on which (step- or capture-) field:
     \vspace*{-0.7\baselineskip}
     \item Wave transfers all of received momentum to a piece it activates.
 \end{itemize}
+
+\clearpage % ..........................................................
+
+\subsection*{Piece steps}
+\addcontentsline{toc}{subsection}{Piece steps}
+\label{sec:Appendix/Piece steps}
+
+% \begin{table}[!h]
+% \centering
+% \begin{tabular}{ ll }
+% \toprule % ===============================================================
+% \textbf{Piece}              & \textbf{Steps}                            \\
+% \midrule % ---------------------------------------------------------------
+% Pawn                        & capture-\footnotemark[1]                  \\
+% Knight                      & capture-                                  \\
+% Bishop                      & capture-                                  \\
+% Rook                        & capture-                                  \\
+% Queen                       & capture-                                  \\
+% King                        & capture-                                  \\
+% \cmidrule{1-2} % .........................................................
+% Pegasus                     & capture-                                  \\
+% Pyramid                     & capture-                                  \\
+% Unicorn                     & capture-                                  \\
+% Wave                        & ---                                       \\
+% Star                        & ---                                       \\
+% Centaur                     & capture-                                  \\
+% Scout                       & capture-\footnotemark[1]                  \\
+% Grenadier                   & capture-\footnotemark[1]                  \\
+% Serpent                     & capture-                                  \\
+% \cmidrule{1-2} % .........................................................
+% \multirow{3}{*}{Shaman}     & capture-\footnotemark[1],                 \\
+%                             & entrancing-,                              \\
+%                             & entranced-                                \\
+% \cmidrule{1-2} % .........................................................
+% Monolith                    & ---                                       \\
+% \cmidrule{1-2} % .........................................................
+% \multirow{2}{*}{Starchild}  & miracle-,                                 \\
+%                             & uplifting-                                \\
+% \bottomrule % ============================================================
+% \end{tabular}
+% \caption{Piece steps}
+% \label{tbl:Appendix/Piece steps}
+% \end{table}
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{ ll }
+\toprule % ===============================================================
+\textbf{Piece}              & \textbf{Steps}                            \\
+\midrule % ---------------------------------------------------------------
+Pawn                        & capture-\footnotemark[1]                  \\
+Knight                      & capture-                                  \\
+Bishop                      & capture-                                  \\
+Rook                        & capture-                                  \\
+Queen                       & capture-                                  \\
+King                        & capture-                                  \\
+\cmidrule{1-2} % .........................................................
+Pegasus                     & capture-                                  \\
+Pyramid                     & capture-                                  \\
+Unicorn                     & capture-                                  \\
+Wave                        & ---                                       \\
+Star                        & ---                                       \\
+Centaur                     & capture-                                  \\
+Scout                       & capture-\footnotemark[1]                  \\
+Grenadier                   & capture-\footnotemark[1]                  \\
+Serpent                     & capture-                                  \\
+Shaman                      & capture-\footnotemark[1], entrancing-, entranced- \\
+Monolith                    & ---                                       \\
+Starchild                   & miracle-, uplifting-                      \\
+\bottomrule % ============================================================
+\end{tabular}
+\caption{Piece steps (beside movement)}
+\label{tbl:Appendix/Piece steps}
+\end{table}
+
+\footnotetext[1]{Movement and capture-steps are separated.}
+
+Table above lists all different steps a piece have in addition to movement step;
+Wave, Star and Monolith don't have any beside movement, and so are denoted with
+\emph{---} (long dash).
+
+Displacement steps are not listed, as those are not voluntarily performed; e.g.
+Pawn can be displaced when encountered by opponent's Serpent, Pawn on its own
+cannot take displacement step.
 
 \clearpage % ..........................................................
 

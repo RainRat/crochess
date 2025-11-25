@@ -149,6 +149,68 @@ Macros
         negative value if an error occurred.
     :seealso: https://en.cppreference.com/w/c/io/fprintf.html
 
+.. c:macro:: CC_CONCAT(token1,token2)
+
+    Macro to concatenate 2 tokens, after arguments expansion.
+
+    :param token1: Valid C token.
+    :param token2: Valid C token.
+    :returns: A concatenated valid C token.
+    :seealso: https://gcc.gnu.org/onlinedocs/cpp/Concatenation.html
+
+.. c:macro:: CC_STRINGIFY(token)
+
+    Macro to stringify given token, after argument expansion.
+
+    :param token: Valid C token.
+    :returns: A stringified valid C token.
+    :seealso: https://gcc.gnu.org/onlinedocs/cpp/Stringizing.html
+
+.. c:macro:: CC_ERROR(msg)
+
+    Macro to concatenate given message after current file name and line number,
+    e.g. :c:`"tests.c[95]: Test failed successfully!"`.
+
+    Macro produces compile-time error message which is not allocated, so it's
+    suitable as a return value from functions returning strings instead of
+    :c:`bool`\eans when they fail.
+
+    For instance, instead of function returning :c:`bool` value to indicate
+    success:
+
+    .. code-block:: C
+        :force:
+
+        bool foo( ... ) {
+            bool result = /* Do something here, and set result. */;
+            return result;
+        }
+
+    it could be rewriten to return :c:`const`\ant string pointer, where
+    :c:data:`NULL` indicates success, and non-:c:data:`NULL` return value
+    is error message:
+
+    .. code-block:: C
+        :force:
+
+        char const * foo( ... ) {
+            bool result = /* Do something here, and set result. */;
+            return result ? NULL : CC_ERROR( "Foo failed!" );
+        }
+
+    .. note::
+
+        Given :c:var:`msg` must be valid compile-time string,
+        i.e. constant, non-:c:data:`NULL` pointer to null-terminated string.
+
+    .. warning::
+
+        Produced error message is not allocated, do not :c:func:`free()` it.
+
+    :param msg: Compile-time, constant string.
+    :returns: A compile-time error message.
+    :seealso: https://en.cppreference.com/w/c/preprocessor/replace.html
+
 .. _lbl-libcc-ccdefines-maybebool:
 
 Maybe bool
