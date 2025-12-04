@@ -27,6 +27,8 @@
 #include "cc_parse_utils.h"
 #include "cc_parse_msg.h"
 #include "cc_parse_move.h"
+#include "cc_typed_step.h"
+#include "cc_typed_step_defs.h"
 
 #include "hlp_msgs.h"
 #include "test_msgs.h"
@@ -38,7 +40,7 @@
 #include "tests.h"
 
 
-char const CROCHESS_TESTS_VERSION[] = "0.0.1.359:1538+20251125.021803"; // source-new-crochess-tests-version-major-minor-feature-commit+meta~breaks-place-marker
+char const CROCHESS_TESTS_VERSION[] = "0.0.1.370:1549+20251202.053946"; // source-new-crochess-tests-version-major-minor-feature-commit+meta~breaks-place-marker
 
 #ifdef __WITH_LINE_NOISE__
 char const CROCHESS_TESTS_HISTORY_FILE_NAME[] = "history_tests.txt";
@@ -47,18 +49,22 @@ char const CROCHESS_TESTS_HISTORY_FILE_NAME[] = "history_tests.txt";
 
 int get_integer_from_cli_arg( char const * str,
                               int default_num,
-                              char const ** first_io,
+                              char const ** start_io,
                               char const ** end_io ) {
     int number = default_num;
     cc_char_16 num = CC_CHAR_16_EMPTY;
 
-    if ( cc_iter_token( str, CC_TOKEN_SEPARATORS_WHITESPACE, first_io, end_io ) ) {
-        if ( *first_io >= *end_io ) return default_num;
+    if ( !start_io || !end_io || ( *start_io >= *end_io ) )
+        return default_num;
 
-        size_t len = *end_io - *first_io;
+    if ( cc_iter_token( str, CC_TOKEN_SEPARATORS_WHITESPACE, start_io, end_io ) ) {
+        if ( !start_io || !end_io || ( *start_io >= *end_io ) )
+            return default_num;
+
+        size_t len = *end_io - *start_io;
         if ( len > CC_MAX_LEN_CHAR_16 - 1 ) return default_num;
 
-        memcpy( num, *first_io, len );
+        memcpy( num, *start_io, len );
         number = atoi( num );
     }
 
@@ -339,7 +345,21 @@ int main( void ) {
         } else if ( cc_str_is_equal( token_start, token_end, "tx", NULL, BUFSIZ ) ||
                     cc_str_is_equal( token_start, token_end, "test_misc", NULL, BUFSIZ ) ) {
             int test_number = get_integer_from_cli_arg( line, TEST_ALL_MOVES, &token_start, &token_end );
-            tests_misc( test_number );
+            int moving = get_integer_from_cli_arg( line, CHAR_MIN, &token_start, &token_end );
+            int step_type = get_integer_from_cli_arg( line, CHAR_MIN, &token_start, &token_end );
+            int encounter = get_integer_from_cli_arg( line, CHAR_MIN, &token_start, &token_end );
+
+            // TODO :: DEBUG :: DELETE
+            char moving_chr = cc_piece_as_char( moving );
+            char moving_tag = cc_tag_as_char( moving );
+            char encounter_chr = cc_piece_as_char( encounter );
+            char encounter_tag = cc_tag_as_char( encounter );
+            char step_type_chr = cc_step_type_as_char( step_type );
+
+            printf( "Inputs: %d ~~%d~~> %d ==> %c%c --%c--> %c%c \n", moving, step_type, encounter, moving_chr, moving_tag, step_type_chr, encounter_chr, encounter_tag );
+            // TODO :: DEBUG :: DELETE
+
+            tests_misc( test_number, moving, step_type, encounter );
         } else if ( cc_str_is_equal( token_start, token_end, "ta", NULL, BUFSIZ ) ||
                     cc_str_is_equal( token_start, token_end, "test_path_segment", NULL, BUFSIZ ) ) {
             int test_number = get_integer_from_cli_arg( line, TEST_ALL_MOVES, &token_start, &token_end );

@@ -35,13 +35,57 @@ bool cc_check_valid_draw_offer_exists( CcMove * moves,
 // Piece checks
 
 bool cc_check_piece_can_step( CcPieceTagType ptt,
-                              CcStepTypeEnum step_type,
-                              bool strict_check ) {
-    if ( !CC_PIECE_IS_VALID( ptt ) ) return false;
-    if ( !CC_STEP_TYPE_IS_VALID( step_type ) ) return false;
+                              CcStepTypeEnum step_type ) {
+    if ( !CC_PIECE_IS_VALID( ptt ) ) return false; // <!> Do not remove, very much needed at [2].
 
+    // if ( !CC_STEP_TYPE_IS_VALID( step_type ) ) return false; // Not really needed, default in switch at [1] handles invalid values.
 
-    return false; // TODO :: FIX
+    switch ( step_type ) {
+        case CC_STE_MovementOnly :
+            return CC_PIECE_IS_PAWN( ptt ) ||
+                   CC_PIECE_IS_WAVE( ptt ) ||
+                   CC_PIECE_IS_SCOUT( ptt ) ||
+                   CC_PIECE_IS_GRENADIER( ptt ) ||
+                   CC_PIECE_IS_SHAMAN( ptt ) ||
+                   CC_PIECE_IS_STAR( ptt ) ||
+                   CC_PIECE_IS_STARCHILD( ptt ) ||
+                   CC_PIECE_IS_MONOLITH( ptt );
+
+        case CC_STE_CaptureOnly :
+            return CC_PIECE_IS_PAWN( ptt ) ||
+                   CC_PIECE_IS_SCOUT( ptt ) ||
+                   CC_PIECE_IS_GRENADIER( ptt ) ||
+                   CC_PIECE_IS_SHAMAN( ptt );
+
+        case CC_STE_MovementOrCapture :
+            return CC_PIECE_IS_KNIGHT( ptt ) ||
+                   CC_PIECE_IS_BISHOP( ptt ) ||
+                   CC_PIECE_IS_ROOK( ptt ) ||
+                   CC_PIECE_IS_QUEEN( ptt ) ||
+                   CC_PIECE_IS_KING( ptt ) ||
+                   CC_PIECE_IS_PEGASUS( ptt ) ||
+                   CC_PIECE_IS_PYRAMID( ptt ) ||
+                   CC_PIECE_IS_UNICORN( ptt ) ||
+                   CC_PIECE_IS_CENTAUR( ptt ) ||
+                   CC_PIECE_IS_SERPENT( ptt );
+
+        case CC_STE_Displacement :
+            return !CC_PIECE_IS_KING( ptt ) &&
+                   !CC_PIECE_IS_STAR( ptt ) &&
+                   !CC_PIECE_IS_MONOLITH( ptt ); // [2]
+
+        case CC_STE_ColorChange :
+            return CC_PIECE_IS_SERPENT( ptt );
+
+        case CC_STE_Entrancement :
+            return CC_PIECE_IS_SHAMAN( ptt );
+
+        case CC_STE_Uplifting : // Intentional fall-through.
+        case CC_STE_Miracle :
+            return CC_PIECE_IS_STARCHILD( ptt );
+
+        default : return false; // [1]
+    }
 }
 
 bool cc_check_piece_can_lose_tag( CcPieceTagType ptt,
@@ -144,6 +188,8 @@ bool cc_check_piece_can_activate( CcPieceTagType moving,
     if ( !CC_PIECE_CAN_ACTIVATE( moving ) ) return false; // [1] Stars and Monolith can't activate anything.
     if ( !CC_PIECE_CAN_BE_ACTIVATED( encounter ) ) return false; // [2] Kings and Monoliths can't be activated.
 
+    if ( !cc_check_piece_can_step( moving, step_type ) ) return false;
+
     bool wave_moving = CC_PIECE_IS_WAVE( moving );
     bool wave_encounter = CC_PIECE_IS_WAVE( encounter );
 
@@ -215,11 +261,13 @@ bool cc_check_piece_can_activate_at( CcChessboard * cb,
     if ( !cb ) return false;
     if ( !CC_POS_IS_LEGAL( destination, cc_chessboard_get_size( cb ) ) ) return false;
 
+    // if ( !cc_check_piece_can_step( moving, step_type ) ) return false; // Not needed, checked in function call at [1].
+
     if ( !cc_activation_desc_is_legal( act_desc, moving, is_first_ply ) ) return false;
 
     CcPieceTagType encounter = cc_chessboard_get_piece( cb, destination.i, destination.j );
 
-    // Function checks its arguments, and -by extension- ours moving, step_type.
+    // [1] Function checks its arguments, and -by extension- ours moving, step_type.
     if ( !cc_check_piece_can_activate( moving, encounter, act_desc.momentum, step_type ) ) return false;
 
     if ( CC_PIECE_IS_WEIGHTLESS( encounter ) )

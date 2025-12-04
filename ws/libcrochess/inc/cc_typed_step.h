@@ -65,16 +65,29 @@ typedef enum CcMultiStagePlyTypeEnum {
 //
 // Typed step
 
+#define CC_STEP_TYPE_CHAR_NONE ' '
+#define CC_STEP_TYPE_CHAR_INVALID '?'
+
+#define CC_STEP_TYPE_CHAR_MOVEMENT_ONLY '-'
+#define CC_STEP_TYPE_CHAR_MOVEMENT_OR_CAPTURE '#'
+#define CC_STEP_TYPE_CHAR_CAPTURE_ONLY '*'
+
+#define CC_STEP_TYPE_CHAR_DISPLACEMENT '<'
+#define CC_STEP_TYPE_CHAR_COLOR_CHANGE '%'
+#define CC_STEP_TYPE_CHAR_ENTRANCEMENT '@'
+#define CC_STEP_TYPE_CHAR_UPLIFTING '^'
+#define CC_STEP_TYPE_CHAR_MIRACLE '"'
+
 typedef enum CcStepTypeEnum {
     CC_STE_None = 0,
-    CC_STE_MovementOnly,
-    CC_STE_MovementOrCapture,
-    CC_STE_CaptureOnly,
-    CC_STE_Displacement,
-    CC_STE_ColorChange,
-    CC_STE_Entrancement,
-    CC_STE_Uplifting,
-    CC_STE_Miracle,
+    CC_STE_MovementOnly, // 1
+    CC_STE_MovementOrCapture, // 2
+    CC_STE_CaptureOnly, // 3
+    CC_STE_Displacement, // 4
+    CC_STE_ColorChange, // 5
+    CC_STE_Entrancement, // 6
+    CC_STE_Uplifting, // 7
+    CC_STE_Miracle, // 8
 } CcStepTypeEnum;
 
 #define CC_STEP_TYPE_IS_ENUMERATOR(ste) ( ( CC_STE_None <= (ste) ) && ( (ste) <= CC_STE_Miracle ) )
@@ -84,6 +97,8 @@ typedef enum CcStepTypeEnum {
 #define CC_STEP_TYPE_IS_MOVEMENT(ste) ( ( (ste) == CC_STE_MovementOnly ) || ( (ste) == CC_STE_MovementOrCapture ) )
 
 #define CC_STEP_TYPE_IS_CAPTURE(ste) ( ( (ste) == CC_STE_MovementOrCapture ) || ( (ste) == CC_STE_CaptureOnly ) )
+
+char cc_step_type_as_char( CcStepTypeEnum ste );
 
 #define CC_TYPED_STEP_INVALID { .step = CC_POS_INVALID, .type = CC_STE_None }
 

@@ -12,7 +12,6 @@
 
 #include "cc_version.h"
 #include "cc_token.h"
-#include "cc_piece.h"
 #include "cc_chessboard.h"
 #include "cc_pos.h"
 #include "cc_typed_step_defs.h"
@@ -395,204 +394,254 @@ bool tests_transparencies( void ) {
     return result;
 }
 
-bool tests_activations( void ) {
-    #define TEST_ACTIVATIONS_PIECES_SIZE (7)
+static bool _expected_activation( CcPieceTagType moving,
+                                  CcPieceTagType encounter,
+                                  CcStepTypeEnum step_type,
+                                  cc_uint_t momentum ) {
+    if ( !CC_PIECE_IS_VALID( moving ) ) return false;
+    if ( !CC_PIECE_IS_VALID( encounter ) ) return false;
+    if ( !CC_STEP_TYPE_IS_VALID( step_type ) ) return false;
 
-    CcPieceTagType const TEST_ACTIVATIONS_PIECES[ TEST_ACTIVATIONS_PIECES_SIZE ] = {
-        CC_PTE_LightShaman,
-        CC_PTE_LightPyramid,
-        CC_PTE_LightWave,
-        CC_PTE_Monolith,
-        CC_PTE_LightStarchild,
-        CC_PTE_DarkShaman,
-        CC_PTE_DarkWave,
-    };
+    if ( ( step_type == CC_STE_Displacement ) || ( step_type == CC_STE_ColorChange ) ) return false; // Steps that cannot be taken and activate a piece at the same time.
 
-    #define TEST_ACTIVATIONS_EXPECTED_SIZE (TEST_ACTIVATIONS_PIECES_SIZE * TEST_ACTIVATIONS_PIECES_SIZE)
-    #define TEST_ACTIVATIONS_RESULTS_SIZE (2 + 4)
+    if ( !CC_PIECE_CAN_ACTIVATE( moving ) ) return false; // [1] Stars, Monolith cannot activate anything.
+    if ( !CC_PIECE_CAN_BE_ACTIVATED( encounter ) ) return false; // Kings, Monolith cannot be activated.
 
-    int const TEST_ACTIVATIONS_EXPECTED[ TEST_ACTIVATIONS_EXPECTED_SIZE ][ TEST_ACTIVATIONS_RESULTS_SIZE ] = {
-        // { moving, encounter, 0/step, 1/step, 0/capture, 1/capture } || momentum/step_type
-        { CC_PTE_LightShaman, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_LightShaman, CC_PTE_LightPyramid, false, false, false, true },
-        { CC_PTE_LightShaman, CC_PTE_LightWave, true, true, true, true },
-        { CC_PTE_LightShaman, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_LightShaman, CC_PTE_LightStarchild, false, false, false, false },
-        { CC_PTE_LightShaman, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_LightShaman, CC_PTE_DarkWave, false, false, false, false },
+    if ( !CC_PIECE_CAN_ACTIVATE_PYRAMID( moving ) && CC_PIECE_IS_PYRAMID( encounter ) ) return false; // Wave, Starchild cannot activate Pyramid at all; others (Star, Monolith) were filtered-out above, at [1].
+    if ( !CC_PIECE_CAN_ACTIVATE_STAR( moving ) && CC_PIECE_IS_STAR( encounter ) ) return false; // Only Starchild can activate Star.
 
-        { CC_PTE_LightPyramid, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_LightPyramid, CC_PTE_LightPyramid, false, false, false, true },
-        { CC_PTE_LightPyramid, CC_PTE_LightWave, true, true, true, true },
-        { CC_PTE_LightPyramid, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_LightPyramid, CC_PTE_LightStarchild, false, false, false, false },
-        { CC_PTE_LightPyramid, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_LightPyramid, CC_PTE_DarkWave, false, false, false, false },
+    if ( !cc_check_piece_can_step( moving, step_type ) ) return false;
 
-        { CC_PTE_LightWave, CC_PTE_LightShaman, false, true, false, true },
-        { CC_PTE_LightWave, CC_PTE_LightPyramid, false, false, false, false },
-        { CC_PTE_LightWave, CC_PTE_LightWave, true, true, true, true },
-        { CC_PTE_LightWave, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_LightWave, CC_PTE_LightStarchild, true, true, true, true },
-        { CC_PTE_LightWave, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_LightWave, CC_PTE_DarkWave, true, true, true, true },
+    bool is_momentum_positive = ( momentum > 0 );
+    bool is_encounter_weightless = CC_PIECE_IS_WEIGHTLESS( encounter ); // Wave or Starchild.
+    bool is_same_owner = cc_piece_has_same_owner( moving, encounter );
 
-        { CC_PTE_Monolith, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_LightPyramid, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_LightWave, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_LightStarchild, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_Monolith, CC_PTE_DarkWave, false, false, false, false },
+    if ( CC_PIECE_IS_STARCHILD( moving ) ) {
+        if ( step_type == CC_STE_Miracle ) {
+            return is_momentum_positive && CC_PIECE_IS_STAR( encounter );
+        } else if ( step_type == CC_STE_Uplifting ) {
+            return CC_PIECE_IS_STARCHILD( encounter )
+                   || ( CC_PIECE_CAN_BE_UPLIFTED( encounter )
+                        && is_same_owner ); // Sense-journey can be taken even with no momentum.
+        } else if ( step_type == CC_STE_MovementOnly ) {
+            return is_encounter_weightless
+                   && cc_piece_has_same_owner( moving, encounter );
+        } else
+            return false;
+    }
 
-        { CC_PTE_LightStarchild, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_LightStarchild, CC_PTE_LightPyramid, false, false, false, false },
-        { CC_PTE_LightStarchild, CC_PTE_LightWave, true, true, true, true },
-        { CC_PTE_LightStarchild, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_LightStarchild, CC_PTE_LightStarchild, true, true, true, true },
-        { CC_PTE_LightStarchild, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_LightStarchild, CC_PTE_DarkWave, false, false, false, false },
+    bool is_own_wave = CC_PIECE_IS_WAVE( encounter )
+                       && is_same_owner;
 
-        { CC_PTE_DarkShaman, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_LightPyramid, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_LightWave, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_LightStarchild, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_DarkShaman, false, false, false, false },
-        { CC_PTE_DarkShaman, CC_PTE_DarkWave, true, true, true, true },
+    bool is_own_pyramid = is_momentum_positive
+                          && CC_PIECE_IS_PYRAMID( encounter )
+                          && is_same_owner;
 
-        { CC_PTE_DarkWave, CC_PTE_LightShaman, false, false, false, false },
-        { CC_PTE_DarkWave, CC_PTE_LightPyramid, false, false, false, false },
-        { CC_PTE_DarkWave, CC_PTE_LightWave, true, true, true, true },
-        { CC_PTE_DarkWave, CC_PTE_Monolith, false, false, false, false },
-        { CC_PTE_DarkWave, CC_PTE_LightStarchild, false, false, false, false },
-        { CC_PTE_DarkWave, CC_PTE_DarkShaman, false, true, false, true },
-        { CC_PTE_DarkWave, CC_PTE_DarkWave, true, true, true, true },
-        // { moving, encounter, 0/step, 1/step, 0/capture, 1/capture } || momentum/step_type
-    };
+    if ( CC_PIECE_IS_SHAMAN( moving ) ) {
+        if ( step_type == CC_STE_Entrancement ) {
+            return CC_PIECE_IS_SHAMAN( encounter )
+                   || CC_PIECE_IS_STARCHILD( encounter ); // Trance-journey can be taken even with no momentum.
+        } else if ( step_type == CC_STE_CaptureOnly ) {
+            return is_own_wave || is_own_pyramid;
+        } else if ( step_type == CC_STE_MovementOnly ) {
+            return is_own_wave;
+        } else
+            return false;
+    }
 
+    if ( CC_PIECE_IS_PAWN( moving )
+            || CC_PIECE_IS_SCOUT( moving )
+            || CC_PIECE_IS_GRENADIER( moving ) ) {
+        if ( step_type == CC_STE_CaptureOnly ) {
+            return is_own_wave || is_own_pyramid;
+        } else if ( step_type == CC_STE_MovementOnly ) {
+            return is_own_wave;
+        } else
+            return false;
+    }
+
+    if ( step_type == CC_STE_MovementOrCapture ) {
+        return is_own_wave || is_own_pyramid;
+    }
+
+    return false;
+}
+
+static bool _tests_activation( CcPieceTagType moving,
+                               CcStepTypeEnum step_type,
+                               CcPieceTagType encounter ) {
+    if ( !CC_PIECE_IS_ENUMERATOR( moving ) ) return false;
+    if ( !CC_STEP_TYPE_IS_ENUMERATOR( step_type ) ) return false;
+    if ( !CC_PIECE_IS_ENUMERATOR( encounter ) ) return false;
+
+    bool expected_0 = _expected_activation( moving, encounter, step_type, 0 );
+    bool expected_1 = _expected_activation( moving, encounter, step_type, 1 );
+
+    bool result_0 = cc_check_piece_can_activate( moving, encounter, 0, step_type );
+    bool result_1 = cc_check_piece_can_activate( moving, encounter, 1, step_type );
+    bool result = ( result_0 == expected_0 ) && ( result_1 == expected_1 );
+
+    char moving_chr = cc_piece_as_char( moving );
+    char moving_tag = cc_tag_as_char( moving );
+    char encounter_chr = cc_piece_as_char( encounter );
+    char encounter_tag = cc_tag_as_char( encounter );
+    char step_type_chr = cc_step_type_as_char( step_type );
+
+    printf( "%c%c --%c--> %c%c: %d, %d <-- %d, %d == %d.\n", moving_chr, moving_tag, step_type_chr, encounter_chr, encounter_tag, result_0, result_1, expected_0, expected_1, result );
+
+    return result;
+}
+
+bool tests_activation( CcPieceTagType moving,
+                       CcStepTypeEnum step_type,
+                       CcPieceTagType encounter ) {
+    if ( !CC_PIECE_IS_ENUMERATOR( moving ) ) return false;
+    if ( !CC_PIECE_IS_ENUMERATOR( encounter ) ) return false;
+
+    bool cumulative_result = true;
+
+    bool is_step_type_enumerator = CC_STEP_TYPE_IS_ENUMERATOR( step_type );
+
+    if ( is_step_type_enumerator ) {
+        cumulative_result = _tests_activation( moving, step_type, encounter ) && cumulative_result;
+    } else {
+        for ( CcStepTypeEnum st = CC_STE_MovementOnly; st <= CC_STE_Miracle; ++st ) {
+            cumulative_result = _tests_activation( moving, st, encounter ) && cumulative_result;
+        }
+    }
+
+    return cumulative_result;
+}
+
+// typedef enum CcPieceTagEnum {
+//     CC_PTE_DimStar = -29,
+
+//     CC_PTE_DarkStarchild, // -28
+//     CC_PTE_DarkShaman, // -27
+//     CC_PTE_DarkSerpent, // -26
+
+//     CC_PTE_DarkGrenadier_RushedCurrent, // -25
+//     CC_PTE_DarkGrenadier_RushedPrevious, // -24
+//     CC_PTE_DarkGrenadier_CanRush, // -23
+//     CC_PTE_DarkGrenadier, // -22
+
+//     CC_PTE_DarkScout_RushedCurrent, // -21
+//     CC_PTE_DarkScout_RushedPrevious, // -20
+//     CC_PTE_DarkScout_CanRush, // -19
+//     CC_PTE_DarkScout, // -18
+
+//     CC_PTE_DarkCentaur, // -17
+//     CC_PTE_DarkWave, // -16
+//     CC_PTE_DarkUnicorn, // -15
+//     CC_PTE_DarkPyramid, // -14
+//     CC_PTE_DarkPegasus, // -13
+
+//     CC_PTE_DarkKing_CanCastle, // -12
+//     CC_PTE_DarkKing, // -11
+
+//     CC_PTE_DarkQueen, // -10
+
+//     CC_PTE_DarkRook_CanCastle, // -9
+//     CC_PTE_DarkRook, // -8
+
+//     CC_PTE_DarkBishop, // -7
+//     CC_PTE_DarkKnight, // -6
+
+//     CC_PTE_DarkPawn_DelayedPromotion, // -5
+//     CC_PTE_DarkPawn_RushedCurrent, // -4
+//     CC_PTE_DarkPawn_RushedPrevious, // -3
+//     CC_PTE_DarkPawn_CanRush, // -2
+//     CC_PTE_DarkPawn, // -1
+
+//     CC_PTE_None = 0,
+
+//     CC_PTE_LightPawn, // 1
+//     CC_PTE_LightPawn_CanRush, // 2
+//     CC_PTE_LightPawn_RushedPrevious, // 3
+//     CC_PTE_LightPawn_RushedCurrent, // 4
+//     CC_PTE_LightPawn_DelayedPromotion, // 5
+
+//     CC_PTE_LightKnight, // 6
+//     CC_PTE_LightBishop, // 7
+
+//     CC_PTE_LightRook, // 8
+//     CC_PTE_LightRook_CanCastle, // 9
+
+//     CC_PTE_LightQueen, // 10
+
+//     CC_PTE_LightKing, // 11
+//     CC_PTE_LightKing_CanCastle, // 12
+
+//     CC_PTE_LightPegasus, // 13
+//     CC_PTE_LightPyramid, // 14
+//     CC_PTE_LightUnicorn, // 15
+//     CC_PTE_LightWave, // 16
+//     CC_PTE_LightCentaur, // 17
+
+//     CC_PTE_LightScout, // 18
+//     CC_PTE_LightScout_CanRush, // 19
+//     CC_PTE_LightScout_RushedPrevious, // 20
+//     CC_PTE_LightScout_RushedCurrent, // 21
+
+//     CC_PTE_LightGrenadier, // 22
+//     CC_PTE_LightGrenadier_CanRush, // 23
+//     CC_PTE_LightGrenadier_RushedPrevious, // 24
+//     CC_PTE_LightGrenadier_RushedCurrent, // 25
+
+//     CC_PTE_LightSerpent, // 26
+//     CC_PTE_LightShaman, // 27
+//     CC_PTE_LightStarchild, // 28
+
+//     CC_PTE_BrightStar = 29,
+
+//     CC_PTE_Monolith, // 30
+// } CcPieceTagEnum;
+
+bool tests_activations( CcPieceTagType moving,
+                        CcStepTypeEnum step_type,
+                        CcPieceTagType encounter ) {
+    bool first = true;
     bool result = true;
-    bool found = false;
+
+    bool is_moving_enumerator = CC_PIECE_IS_ENUMERATOR( moving );
+    bool is_step_type_enumerator = CC_STEP_TYPE_IS_ENUMERATOR( step_type );
+    bool is_encounter_enumerator = CC_PIECE_IS_ENUMERATOR( encounter );
+
+    bool divider = !first || !is_step_type_enumerator;
 
     printf( "---------------------\n" );
-    printf( "moving -> encounter [momentum/step_type: 0/step, 1/step, 0/capture, 1/capture]: results <-- expected == result.\n" );
-    for ( int i = 0; i < TEST_ACTIVATIONS_PIECES_SIZE; ++i ) {
-        printf( ".....................\n" );
-
-        for ( int j = 0; j < TEST_ACTIVATIONS_PIECES_SIZE; ++j ) {
-            CcPieceTagType moving = TEST_ACTIVATIONS_PIECES[ i ];
-            CcPieceTagType encounter = TEST_ACTIVATIONS_PIECES[ j ];
-
-            bool is_step_0 = cc_check_piece_can_activate( moving, encounter, 0, CC_STE_MovementOnly );
-            bool is_step_1 = cc_check_piece_can_activate( moving, encounter, 1, CC_STE_MovementOnly );
-            bool is_capture_0 = cc_check_piece_can_activate( moving, encounter, 0, CC_STE_CaptureOnly );
-            bool is_capture_1 = cc_check_piece_can_activate( moving, encounter, 1, CC_STE_CaptureOnly );
-
-            char moving_chr = cc_piece_as_char( moving );
-            char encounter_chr = cc_piece_as_char( encounter );
-
-            bool expect_step_0 = false;
-            bool expect_step_1 = false;
-            bool expect_capture_0 = false;
-            bool expect_capture_1 = false;
-
-            for ( int z = 0; z < TEST_ACTIVATIONS_EXPECTED_SIZE; ++z ) {
-                CcPieceTagType m = TEST_ACTIVATIONS_EXPECTED[ z ][ 0 ];
-                CcPieceTagType e = TEST_ACTIVATIONS_EXPECTED[ z ][ 1 ];
-
-                if ( m == moving && e == encounter ) {
-                    expect_step_0 = TEST_ACTIVATIONS_EXPECTED[ z ][ 2 ];
-                    expect_step_1 = TEST_ACTIVATIONS_EXPECTED[ z ][ 3 ];
-                    expect_capture_0 = TEST_ACTIVATIONS_EXPECTED[ z ][ 4 ];
-                    expect_capture_1 = TEST_ACTIVATIONS_EXPECTED[ z ][ 5 ];
-
-                    found = true;
-                    break;
-                }
-            };
-
-            if ( found ) {
-                bool r = ( is_step_0 == expect_step_0 ) &&
-                         ( is_step_1 == expect_step_1 ) &&
-                         ( is_capture_0 == expect_capture_0 ) &&
-                         ( is_capture_1 == expect_capture_1 );
-
-                printf( "%c --> %c: %d, %d, %d, %d <-- %d, %d, %d, %d == %d.\n", moving_chr, encounter_chr, is_step_0, is_step_1, is_capture_0, is_capture_1, expect_step_0, expect_step_1, expect_capture_0, expect_capture_1, r );
-                result = r && result;
-            } else {
-                printf( "Unhandled test case: %c --> %c.\n", moving_chr, encounter_chr );
-                result = false;
+    if ( is_moving_enumerator && is_encounter_enumerator ) {
+        result = tests_activation( moving, step_type, encounter ) && result;
+    } else if ( is_moving_enumerator ) {
+        for ( CcPieceTagType e = CC_PTE_DimStar; e <= CC_PTE_Monolith; ++e ) {
+            if ( divider ) printf( ".....................\n" );
+            result = tests_activation( moving, step_type, e ) && result;
+            first = false;
+        }
+    } else if ( is_encounter_enumerator ) {
+        for ( CcPieceTagType m = CC_PTE_DimStar; m <= CC_PTE_Monolith; ++m ) {
+            if ( divider ) printf( ".....................\n" );
+            result = tests_activation( m, step_type, encounter ) && result;
+            first = false;
+        }
+    } else {
+        for ( CcPieceTagType m = CC_PTE_DimStar; m <= CC_PTE_Monolith; ++m ) {
+            for ( CcPieceTagType e = CC_PTE_DimStar; e <= CC_PTE_Monolith; ++e ) {
+                if ( divider ) printf( ".....................\n" );
+                result = tests_activation( m, step_type, e ) && result;
+                first = false;
             }
         }
     }
     printf( "---------------------\n" );
 
-    // > tx 9
-    // ---------------------
-    // moving -> encounter [momentum/step_type: 0/step, 1/step, 0/capture, 1/capture]: results <-- expected == result.
-    // .....................
-    // H --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // H --> A: 0, 0, 0, 1 <-- 0, 0, 0, 1 == 1.
-    // H --> W: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // H --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // H --> I: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // H --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // H --> w: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // .....................
-    // A --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // A --> A: 0, 0, 0, 1 <-- 0, 0, 0, 1 == 1.
-    // A --> W: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // A --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // A --> I: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // A --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // A --> w: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // .....................
-    // W --> H: 0, 1, 0, 1 <-- 0, 1, 0, 1 == 1.
-    // W --> A: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // W --> W: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // W --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // W --> I: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // W --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // W --> w: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // .....................
-    // M --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> A: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> W: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> I: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // M --> w: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // .....................
-    // I --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // I --> A: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // I --> W: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // I --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // I --> I: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // I --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // I --> w: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // .....................
-    // h --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> A: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> W: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> I: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> h: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // h --> w: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // .....................
-    // w --> H: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // w --> A: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // w --> W: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // w --> M: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // w --> I: 0, 0, 0, 0 <-- 0, 0, 0, 0 == 1.
-    // w --> h: 0, 1, 0, 1 <-- 0, 1, 0, 1 == 1.
-    // w --> w: 1, 1, 1, 1 <-- 1, 1, 1, 1 == 1.
-    // ---------------------
-    // Finished: '1'.
-
     return result;
 }
 
-bool tests_misc( int test_number ) {
+bool tests_misc( int test_number,
+                 int moving,
+                 int step_type,
+                 int encounter ) {
     if ( ( test_number < TEST_ALL_MOVES ) || ( 9 < test_number ) ) {
         printf( "No such a misc test: '%d'.\n", test_number );
         return false;
@@ -626,7 +675,9 @@ bool tests_misc( int test_number ) {
         result = tests_transparencies() && result;
 
     if ( ( test_number == 9 ) || do_all_tests )
-        result = tests_activations() && result;
+        result = tests_activations( (CcPieceTagType)moving,
+                                    (CcStepTypeEnum)step_type,
+                                    (CcPieceTagType)encounter ) && result;
 
     printf( "Finished: '%d'.\n", result );
     return result;
