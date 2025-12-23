@@ -16,10 +16,10 @@ path definitions, types and functions.
 
     Paths are discussed in greater details in :doc:`paths`.
 
-.. _lbl-libcc-ccpath-linkedpathsegments:
+.. _lbl-libcc-ccpath-pathnodesegments:
 
-Linked path segments
---------------------
+Path node segments
+------------------
 
 .. c:struct:: CcPathNode
 
@@ -126,6 +126,90 @@ Linked path segments
 
     :c:`Struct` is tagged with the same :c:struct:`CcPathNode` name.
 
+.. _lbl-libcc-ccpath-pathnodelinkage:
+
+Path node linkage
+^^^^^^^^^^^^^^^^^
+
+.. c:enum:: CcPathNodeLinkageEnum
+
+    Enumerates all node links in a path node, i.e. all different pointers a node
+    can use to have a link to another node, see :c:struct:`CcPathNode`.
+
+    .. c:enumerator:: CC_PNLE_None
+
+    .. c:enumerator:: CC_PNLE_Fork
+
+    .. c:enumerator:: CC_PNLE_Alt
+
+    .. c:enumerator:: CC_PNLE_Sub
+
+    :c:`enum` is tagged with the same :c:enum:`CcPathNodeLinkageEnum` name.
+
+.. c:macro:: CC_PATH_NODE_LINKAGE_IS_ENUMERATOR(pnle)
+
+    Macro to check if given variant value is an enumerator, i.e. between
+    :c:enumerator:`CC_PNLE_None` and :c:enumerator:`CC_PNLE_Sub` values.
+
+    :param pnle: Linkage (integer) value.
+    :returns: :c:data:`true` if enumerator, :c:data:`false` otherwise.
+
+.. c:macro:: CC_PATH_NODE_LINKAGE_IS_VALID(pnle)
+
+    Macro to check if given variant value is a valid enumerator, i.e. between
+    :c:enumerator:`CC_PNLE_Fork` and :c:enumerator:`CC_PNLE_Sub` values.
+
+    :param pnle: Linkage (integer) value.
+    :returns: :c:data:`true` if valid enumerator, :c:data:`false` otherwise.
+
+.. c:macro:: CC_MAX_LEN_PATH_NODE_LINKAGE_STRING
+
+    Maximum length a node linkage string can be, equals to ``4``.
+
+.. c:macro:: CC_SIZE_PATH_NODE_LINKAGE_STRING
+
+    Maximum size a node linkage string can be, equals to
+    :c:macro:`CC_MAX_LEN_PATH_NODE_LINKAGE_STRING` + ``1``.
+
+.. c:function:: char const * cc_path_node_linkage_as_string( CcPathNodeLinkageEnum pnle )
+
+    Function returns string containing user-readable representation of a given
+    path node linkage.
+
+    .. note::
+
+        Returned string is not :c:func:`alloc()`\ated, do not :c:func:`free()` it.
+
+    :param pnle: A node linkage, :c:enum:`CcPathNodeLinkageEnum` value.
+    :returns: Pointer to a non-allocated, null-terminated (``'\0'``) string if successful,
+        :c:data:`NULL` otherwise.
+
+.. c:function:: CcPathNodeLinkageEnum cc_path_node_linkage( CcPathNode * path_node )
+
+    Function returns linkage of a given path node.
+
+    :param path_node: A path node.
+    :returns: Path node linkage, :c:enum:`CcPathNodeLinkageEnum` value.
+
+.. c:function:: char const * cc_path_node_linkage_to_string( CcPathNode * path_node )
+
+    Function returns string containing user-readable linkage representation
+    of a given path node.
+
+    .. note::
+
+        Returned string is not :c:func:`alloc()`\ated, do not :c:func:`free()` it.
+
+    :param path_node: A path node.
+    :returns: Pointer to a non-allocated, null-terminated (``'\0'``) string if successful,
+        :c:data:`NULL` otherwise.
+    :seealso: :c:func:`cc_path_node_linkage_as_string()`
+
+.. _lbl-libcc-ccpath-pathnodefunctions:
+
+Path node functions
+^^^^^^^^^^^^^^^^^^^
+
 .. c:function:: CcPathNode * cc_path_node__new( CcSideEffect side_effect, CcStep ** steps__d_n, CcPieceTagType encounter, CcActivationDesc act_desc )
 
     Function allocates a new path link.
@@ -144,7 +228,7 @@ Linked path segments
     :returns: Pointer to a newly allocated path link if successful,
         :c:data:`NULL` otherwise.
 
-.. c:function:: CcPathNode * cc_path_node_add_fork( CcPathNode ** pn_step__a, CcPathNode ** pn_fork__n )
+.. c:function:: CcPathNode * cc_path_node_add_forks( CcPathNode ** pn_step__a, CcPathNode ** pn_fork__n )
 
     Function extends forking paths of a given path step (:c:`pn_step__a`) with a
     path node (:c:`pn_fork__n`), as an additional alternative path (i.e. appends
@@ -164,7 +248,7 @@ Linked path segments
     :returns: Weak pointer to alternative path if successful,
         :c:data:`NULL` otherwise.
 
-.. c:function:: CcPathNode * cc_path_node_add_alter( CcPathNode ** pn_step__a, CcPathNode ** pn_alt__n )
+.. c:function:: CcPathNode * cc_path_node_add_alters( CcPathNode ** pn_step__a, CcPathNode ** pn_alt__n )
 
     Function extends alternating paths of a given path step (:c:`pn_step__a`) with
     path node (:c:`pn_alt__n`), i.e. appends to :c:`pn_step__a->alt` linked list.
@@ -237,7 +321,7 @@ Linked path segments
 
     Function checks if a given path node is a leaf node.
 
-    Leaf node is one without any of  :c:member:`CcPathNode.fork`,
+    Leaf node is one without any of :c:member:`CcPathNode.fork`,
     :c:member:`CcPathNode.alt`, or :c:member:`CcPathNode.sub`
     valid (non-:c:data:`NULL`) links.
 
@@ -247,6 +331,38 @@ Linked path segments
         * :c:enumerator:`CC_MBE_True` if given path node is leaf,
         * :c:enumerator:`CC_MBE_False` if given path node is not a leaf,
         * :c:enumerator:`CC_MBE_Void` in case of an error, insufficient data given.
+
+.. c:function:: CcMaybeBoolEnum cc_path_node_is_root( CcPathNode * path_node )
+
+    Function checks if a given path node is a root node.
+
+    Root node is one without :c:member:`CcPathNode.back__w` valid (non-:c:data:`NULL`) links.
+
+    :param path_node: A path node.
+    :returns: One of :c:enum:`CcMaybeBoolEnum` values:
+
+        * :c:enumerator:`CC_MBE_True` if given path node is root,
+        * :c:enumerator:`CC_MBE_False` if given path node is not root,
+        * :c:enumerator:`CC_MBE_Void` in case of an error, insufficient data given.
+
+.. c:function:: CcPathNode * cc_path_node_get_node( CcPathNode * path_node, CcPathNodeLinkageEnum preference )
+
+    Function returns root or leaf node for any given path node in a tree,
+    based on :c:var:`preference`
+    as follows:
+
+        * :c:enumerator:`CC_PNLE_None` root node, following :c:member:`CcPathNode.back__w` links
+        * :c:enumerator:`CC_PNLE_Fork` leaf node, following :c:member:`CcPathNode.fork` links
+        * :c:enumerator:`CC_PNLE_Alt` leaf node, following :c:member:`CcPathNode.alt` links
+        * :c:enumerator:`CC_PNLE_Sub` leaf node, following :c:member:`CcPathNode.sub` links
+
+    is returned.
+
+    :param path_node: A path node.
+    :param preference: An :c:enum:`CcPathNodeLinkageEnum` (integer) value.
+    :returns: A pointer to root or leaf path node if successful,
+              :c:data:`NULL` otherwise.
+    :seealso: :c:func:`cc_path_node_is_leaf()`, :c:func:`cc_path_node_is_root()`
 
 .. c:function:: bool cc_path_node_is_valid( CcPathNode * path_node )
 
@@ -303,87 +419,95 @@ Linked path segments
         successful, :c:data:`NULL` otherwise.
     :seealso: :c:func:`cc_pos_to_string()`
 
-.. _lbl-libcc-ccpath-nodelinkage:
+.. _lbl-libcc-ccpath-pathlinkedlist:
 
-Node linkage
-^^^^^^^^^^^^
+Path linked list
+^^^^^^^^^^^^^^^^
 
-.. c:enum:: CcPathNodeLinkageEnum
+.. c:struct:: CcPathLink
 
-    Enumerates all node links in a path node, i.e. all different pointers a node
-    can use to have a link to another node, see :c:struct:`CcPathNode`.
+    Linked path nodes :c:`struct`\ure, linked list.
 
-    .. c:enumerator:: CC_PNLE_NoLinkage
+    .. c:member:: struct CcPathNode * node__w
 
-    .. c:enumerator:: CC_PNLE_Fork
+        A weak pointer to path node.
 
-    .. c:enumerator:: CC_PNLE_Alt
+    .. c:member:: struct CcPathLink * next
 
-    .. c:enumerator:: CC_PNLE_Sub
+        Next linked path node in a linked list.
 
-    :c:`enum` is tagged with the same :c:enum:`CcPathNodeLinkageEnum` name.
+    :c:`struct` is tagged with the same :c:struct:`CcPathLink` name.
 
-.. c:macro:: CC_PATH_NODE_LINKAGE_IS_ENUMERATOR(plnle)
+.. c:function:: CcPathLink * cc_path_link__new( CcPathNode * path_node )
 
-    Macro to check if given variant value is an enumerator, i.e. between
-    :c:enumerator:`CC_PNLE_NoLinkage` and :c:enumerator:`CC_PNLE_Sub` values.
+    Function returns a newly allocated path link, with a weak link to a given path node.
 
-    :param plnle: Variant (integer) value.
-    :returns: :c:data:`true` if enumerator, :c:data:`false` otherwise.
+    :param path_node: A path node to be weak-linked.
+    :returns: A pointer to newly allocated path link if successful,
+              :c:data:`NULL` otherwise.
 
-.. c:macro:: CC_PATH_NODE_LINKAGE_IS_VALID(plnle)
+.. c:function:: CcPathLink * cc_path_link_append( CcPathLink ** path_link__iod_a, CcPathNode * path_node )
 
-    Macro to check if given variant value is a valid enumerator, i.e. between
-    :c:enumerator:`CC_PNLE_NoLinkage` and :c:enumerator:`CC_PNLE_Sub` values.
+    Appends a newly allocated path link to a given linked list.
 
-    This macro is the same as :c:macro:`CC_PATH_NODE_LINKAGE_IS_ENUMERATOR`, since
-    :c:enum:`CcPathNodeLinkageEnum` does not feature *null* (or *void*, or *empty*) value.
+    If linked list :c:`*path_link__iod_a` is :c:data:`NULL`, it will be initialized
+    with a newly allocated path link as its only element.
 
-    :param plnle: Variant (integer) value.
-    :returns: :c:data:`true` if valid enumerator, :c:data:`false` otherwise.
+    :param path_link__iod_a: **Ownership**, *optional* *input/output* parameter;
+        linked list of path nodes to which a new path is appended, inner pointer
+        can be :c:data:`NULL`.
+    :param path_node: A path node.
+    :returns: A weak pointer to newly allocated path link if successful,
+        :c:data:`NULL` otherwise.
 
-.. c:macro:: CC_MAX_LEN_PATH_NODE_LINKAGE_STRING
+.. c:function:: CcPathLink * cc_path_link_duplicate_all__new( CcPathLink * path_link )
 
-    Maximum length a node linkage string can be, equals to ``4``.
+    Duplicates all links in a given path linked list into a newly allocated linked list.
 
-.. c:macro:: CC_SIZE_PATH_NODE_LINKAGE_STRING
+    :param path_link: Linked list to duplicate.
+    :returns: A newly allocated linked list if successful, :c:data:`NULL` otherwise.
 
-    Maximum size a node linkage string can be, equals to
-    :c:macro:`CC_MAX_LEN_PATH_NODE_LINKAGE_STRING` + ``1``.
+.. c:function:: CcPathLink * cc_path_link_extend( CcPathLink ** path_link__iod_a, CcPathLink ** path_link__n )
 
-.. c:function:: char const * cc_path_node_linkage_as_string( CcPathNodeLinkageEnum plnle )
+    Extends given linked list with another.
 
-    Function returns string containing user-readable representation of a given
-    path node linkage.
+    If linked list to extend (:c:`path_link__iod_a`) hasn't been allocated yet,
+    this will initialize it with content of an extending linked list, i.e.
+    :c:`path_link__n`.
 
     .. note::
 
-        Returned string is not :c:func:`alloc()`\ated, do not :c:func:`free()` it.
+        Extending linked list :c:`path_link__n` has its ownership transferred to
+        extended linked list :c:`path_link__iod_a`; as a result, inner pointer
+        :c:`*path_link__n` is :c:data:`NULL`\ed.
 
-    :param plnle: A node linkage, :c:enum:`CcPathNodeLinkageEnum` value.
-    :returns: Pointer to a non-allocated, null-terminated (``'\0'``) string if successful,
-        :c:data:`NULL` otherwise.
+    :param path_link__iod_a: **Ownership**, *optional* *input/output*; linked list to extend.
+    :param path_link__n: **Ownership transfer**, *optional*; linked list with which to extend existing one.
+    :returns: Weak pointer to extended portion of a linked list if successful,
+              :c:data:`NULL` otherwise.
 
-.. c:function:: CcPathNodeLinkageEnum cc_path_node_linkage( CcPathNode * path_node )
+.. c:function:: bool cc_path_link_free_all( CcPathLink ** path_link__f )
 
-    Function returns linkage of a given path node.
+    Frees all path links in a linked list.
 
-    :param path_node: A path node.
-    :returns: Path node linkage, :c:enum:`CcPathNodeLinkageEnum` value.
+    :param pos_link__f: Linked list to :c:func:`free()`.
+    :returns: :c:data:`true` if successful, :c:data:`false` otherwise.
 
-.. c:function:: char const * cc_path_node_linkage_to_string( CcPathNode * path_node )
+.. c:function:: size_t cc_path_link_len( CcPathLink * path_link )
 
-    Function returns string containing user-readable linkage representation
-    of a given path node.
+    Function returning length of linked list of path links.
 
-    .. note::
+    :param pos_link: Linked list of path links.
+    :returns: Length if successful, ``0`` otherwise.
 
-        Returned string is not :c:func:`alloc()`\ated, do not :c:func:`free()` it.
+.. _lbl-libcc-ccpath-pathtreeiterator:
 
-    :param path_node: A path node.
-    :returns: Pointer to a non-allocated, null-terminated (``'\0'``) string if successful,
-        :c:data:`NULL` otherwise.
-    :seealso: :c:func:`cc_path_node_linkage_as_string()`
+Path tree iterator
+^^^^^^^^^^^^^^^^^^
+
+.. todo::
+
+    TODO
 
 .. _lbl-libcc-ccpath-linkedpathbacktracking:
 

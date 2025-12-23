@@ -37,19 +37,19 @@
 //     if ( !cc_chessboard_is_pos_on_board( cb, encounter.pos.i, encounter.pos.j ) ) return false;
 
 //     CcPathSideEffectLink * sel__t = NULL;
-//     CcPathNodeLinkageEnum plnle = CC_PNLE_NoLinkage; // CC_PNLE_Next;
+//     CcPathNodeLinkageEnum pnle = CC_PNLE_None; // CC_PNLE_Next;
 
 //     //
 //     // Terminal side-effects.
 
 //     if ( cc_check_piece_can_capture( moving_from.piece, encounter.piece ) ) {
 //         CcSideEffect se = cc_side_effect_capture( encounter.piece );
-//         CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, plnle, se );
+//         CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, pnle, se );
 //         if ( !se__w ) {
 //             cc_path_side_effect_link_free_all( &sel__t );
 //             return false;
 //         }
-//         plnle = CC_PNLE_Next;
+//         pnle = CC_PNLE_Next;
 //     }
 
 //     // todo :: other terminating side-effects
@@ -57,16 +57,16 @@
 //     //
 //     // Non-terminal side-effects.
 
-//     plnle = CC_PNLE_Next;
+//     pnle = CC_PNLE_Next;
 
 //     if ( cc_check_piece_can_step_over( moving_from.piece, encounter.piece, act_desc.momentum ) ) {
 //         CcSideEffect se = cc_side_effect_transparency( encounter.piece );
-//         CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, plnle, se );
+//         CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, pnle, se );
 //         if ( !se__w ) {
 //             cc_path_side_effect_link_free_all( &sel__t );
 //             return false;
 //         }
-//         plnle = CC_PNLE_Fork;
+//         pnle = CC_PNLE_Fork;
 //     }
 
 //     if ( CC_PIECE_CAN_CAPTURE_EN_PASSANT( moving_from.piece ) &&
@@ -74,12 +74,12 @@
 //         CcPosDesc en_passant = CC_POS_DESC_CAST_INVALID;
 //         if ( cc_find_en_passant_target( cb, moving_from.piece, act_desc, path_ctx__io->ply_ctx.is_first, encounter.pos, &en_passant ) ) {
 //             CcSideEffect se = cc_side_effect_en_passant( en_passant.piece, en_passant.pos );
-//             CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, plnle, se );
+//             CcPathSideEffectLink * se__w = cc_path_side_effect_link_append( &sel__t, pnle, se );
 //             if ( !se__w ) {
 //                 cc_path_side_effect_link_free_all( &sel__t );
 //                 return false;
 //             }
-//             plnle = CC_PNLE_Fork;
+//             pnle = CC_PNLE_Fork;
 //         }
 //     }
 
@@ -391,7 +391,7 @@ bool cc_path_side_effects( CcPosDesc moving_from,
     if ( pn_step_over__t ) {
         pn_step_over__t->act_desc = *ad__w; // TODO :: RETHINK :: is ok ? in all situations ?
 
-        if ( !cc_path_node_add_fork( path_node__io_a, &pn_step_over__t ) ) { // Ownership transfer, do not free( pn_step_over__t ) afterwards.
+        if ( !cc_path_node_add_forks( path_node__io_a, &pn_step_over__t ) ) { // Ownership transfer, do not free( pn_step_over__t ) afterwards.
             cc_step_free_all( &steps__t );
             cc_path_node_free_all( &pn_step_over__t );
             return false;
@@ -433,18 +433,6 @@ bool cc_path_segment( CcSideEffect side_effect,
 
     CcPos pos = moving_from.pos;
     CcStep * steps__t = NULL;
-
-    // TODO :: DELETE :: after cc_path_tree_init(), cc_path_tree() is plugged-in
-    //
-    // If side-effect is valid --> this is movement from encounter, not initial piece movement -->
-    // this step is already added to the parent path node steps, in cc_path_side_effects() --> skip it here.
-    bool skip_first = CC_SIDE_EFFECT_TYPE_IS_VALID( side_effect.type );
-    if ( !skip_first ) {
-        steps__t = cc_step_initial_no_side_effect__new( pos );
-        if ( !steps__t ) return false;
-    }
-    //
-    // TODO :: DELETE :: after cc_path_tree_init(), cc_path_tree() is plugged-in
 
     bool is_starting_pos = path_ctx__io->ply_ctx.is_first;
     CcActivationDesc ad = act_desc;
@@ -508,6 +496,7 @@ bool cc_path_segment( CcSideEffect side_effect,
     }
 
     *path_node__o_a = pn__t; // Ownership transfer, do not free( pn__t ).
+    // pn__t = NULL; // Not needed, not used anymore.
 
     return true;
 }
@@ -524,53 +513,36 @@ bool cc_path_tree( CcPosDesc moving_from,
 
     if ( !cc_path_context_is_legal( path_ctx__io, true, false ) ) return false; // [1]
 
-    // TODO :: DEBUG :: REVERT
-    //
-    // bool sideways_pawns = CC_VARIANT_HAS_SIDEWAYS_PAWNS( path_ctx__io->game__w->chessboard->type );
-    // bool is_same_color = cc_pos_piece_are_same_color( moving_from.pos, moving_from.piece );
-    //
-    // CcTypedStep const * step__w = NULL;
-    //
-    // if ( CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) {
-    //     while ( cc_iter_piece_steps( moving_from.piece,
-    //                                  sideways_pawns,
-    //                                  is_same_color, // Filler, Unicorn and Centaur are not one-step pieces.
-    //                                  CC_SDE_BothDiagonals, // Filler, Serpent is not one-step piece.
-    //                                  CC_STE_None, // No filtering by step types.
-    //                                  &step__w ) ) {
+    bool sideways_pawns = CC_VARIANT_HAS_SIDEWAYS_PAWNS( path_ctx__io->game__w->chessboard->type );
+    bool is_same_color = cc_pos_piece_are_same_color( moving_from.pos, moving_from.piece );
 
-    //     }
-    // } // TODO :: other (types of) pieces
-    //
-    // TODO :: DEBUG :: REVERT
-
-    // TODO :: DEBUG :: DELETE
-    //
-    CcTypedStep step = CC_TYPED_STEP_CAST( 1, -1, CC_STE_MovementOrCapture );
     CcPathNode * path_node__t = NULL;
+    CcTypedStep const * step__w = NULL;
     CcSideEffect se = cc_side_effect_none();
 
-    if ( (*path_node__io_a)->back__w ) {
-        CcPieceTagType encounter = cc_chessboard_get_piece( path_ctx__io->cb_current,
-                                                            moving_from.pos.i,
-                                                            moving_from.pos.j );
+    if ( CC_PIECE_IS_ONE_STEP( moving_from.piece ) ) {
+        while ( cc_iter_piece_steps( moving_from.piece,
+                                     sideways_pawns,
+                                     is_same_color, // Filler, Unicorn and Centaur are not one-step pieces.
+                                     CC_SDE_BothDiagonals, // Filler, Serpent is not one-step piece.
+                                     CC_STE_None, // No filtering by step types.
+                                     &step__w ) ) {
+            if ( !cc_path_context_reset( path_ctx__io ) ) {
+                cc_path_node_free_all( &path_node__t );
+                return false;
+            }
 
-        if ( !CC_PIECE_IS_DIVERGENT( encounter ) ) return false;
+            if ( !cc_path_segment( se, moving_from, *step__w, CC_TYPED_STEP_CAST_INVALID, path_ctx__io, &path_node__t ) ) {
+                cc_path_node_free_all( &path_node__t );
+                return false;
+            }
 
-        se = cc_side_effect_diversion( encounter );
-    }
-
-    if ( !cc_path_segment( se, moving_from, step, CC_TYPED_STEP_CAST_INVALID, path_ctx__io, &path_node__t ) ) {
-        // cc_path_node_free_all( &path_node__t ); // Not needed, path node is set only after everything passes ok.
-        return false;
-    }
-
-    if ( cc_path_node_add_fork( path_node__io_a, &path_node__t ) ) {
-        cc_path_node_free_all( &path_node__t );
-        return false;
-    }
-    //
-    // TODO :: DEBUG :: DELETE
+            if ( !cc_path_node_add_forks( path_node__io_a, &path_node__t ) ) {
+                cc_path_node_free_all( &path_node__t );
+                return false;
+            }
+        }
+    } // TODO :: other (types of) pieces
 
     return true;
 }
