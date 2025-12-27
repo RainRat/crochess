@@ -28,6 +28,8 @@ typedef struct CcPathNode {
 
     CcActivationDesc act_desc; /* <i> Non-cached, stored data of CcPlyContext->act_desc as move, its plies progresses. */ /* Activation descriptor for a moving piece, its momentum usage and momentum it had after all performed steps. */
 
+    bool visited; // TODO :: DOCS
+
     struct CcPathNode * fork;
     struct CcPathNode * alt;
     struct CcPathNode * sub;
@@ -78,33 +80,40 @@ CcPathNode * cc_path_node_add_subs( CcPathNode ** pn_step__a,
 
 CcSideEffect * cc_path_node_last_step_side_effect( CcPathNode * path_node );
 
-CcMaybeBoolEnum cc_path_node_last_step_side_effect_is_none( CcPathNode * path_node );
+CcMaybeBoolEnum cc_path_node_last_step_side_effect_is_valid( CcPathNode * path_node,
+                                                             bool include_none );
 
 CcMaybeBoolEnum cc_path_node_is_leaf( CcPathNode * path_node );
 
 CcMaybeBoolEnum cc_path_node_is_root( CcPathNode * path_node );
 
-CcPathNode * cc_path_node_get_node( CcPathNode * path_node,
-                                    CcPathNodeLinkageEnum preference );
+// bool _cc_path_node_set_all_visited( CcPathNode * path_node__io, bool visited );
+bool cc_path_node_set_all_visited( CcPathNode * path_tree__io, bool visited );
+
+// TODO :: DOCS
+bool cc_path_node_iter_init( CcPathNode ** path_node__io );
+
+// TODO :: DOCS
+CcMaybeBoolEnum cc_path_node_iter_next( CcPathNode ** path_node__io );
 
 // static bool _cc_path_node_steps_are_valid( CcStep * steps );
 // static bool _cc_path_node_is_valid( CcPathNode * path_node, bool has_steps );
-bool cc_path_node_is_valid( CcPathNode * path_node );
+bool cc_path_node_is_valid( CcPathNode * path_tree );
 
-// static CcPathNode * _cc_path_node_duplicate_all__new( CcPathNode * path_root );
-CcPathNode * cc_path_node_duplicate_all__new( CcPathNode * path_node );
+// static CcPathNode * _cc_path_node_duplicate_all__new( CcPathNode * path_node );
+CcPathNode * cc_path_node_duplicate_all__new( CcPathNode * path_tree );
 
-// static bool _cc_path_node_free_all( CcPathNode ** path_root__f );
-bool cc_path_node_free_all( CcPathNode ** path_node__f );
+// static bool _cc_path_node_free_all( CcPathNode ** path_node__f );
+bool cc_path_node_free_all( CcPathNode ** path_tree__f );
 
-// static size_t _cc_path_node_count( CcPathNode * path_root );
-size_t cc_path_node_count( CcPathNode * path_node );
+// static size_t _cc_path_node_count( CcPathNode * path_node );
+size_t cc_path_node_count( CcPathNode * path_tree );
 
-size_t cc_path_node_count_all_segments( CcPathNode * path_node );
+size_t cc_path_node_count_all_segments( CcPathNode * path_tree );
 
 // static char * _cc_path_node_to_string__new( cc_uchar_t depth,
-//                                             CcPathNode * path_root );
-char * cc_path_node_to_string__new( CcPathNode * path_node );
+//                                             CcPathNode * path_node );
+char * cc_path_node_to_string__new( CcPathNode * path_tree );
 
 //
 // Path linked list.
@@ -131,9 +140,9 @@ size_t cc_path_link_len( CcPathLink * path_link );
 //
 // Path tree iterator.
 
-// static bool _cc_path_node_walk_to_leaf( CcPathNode * path_root,
+// static bool _cc_path_node_walk_to_leaf( CcPathNode * path_node,
 //                                         CcPathLink ** root_to_leaf__iod );
-// static bool _cc_path_node_iter_to_leaf( CcPathNode * path_root,
+// static bool _cc_path_node_iter_to_leaf( CcPathNode * path_node,
 //                                         CcPathLink ** root_to_leaf__iod );
 // TODO :: DOCS
 bool cc_path_node_iter_to_leaf( CcPathNode * path_node,
