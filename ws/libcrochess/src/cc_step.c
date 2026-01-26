@@ -7,8 +7,8 @@
 #include "cc_step.h"
 
 
-char const * cc_step_link_type_symbol( CcStepLinkTypeEnum sle ) {
-    switch ( sle ) {
+char const * cc_step_link_type_symbol( CcStepLinkTypeEnum slte ) {
+    switch ( slte ) {
         case CC_SLTE_None : return NULL;
         case CC_SLTE_InitialPosition : return "";
         case CC_SLTE_Reposition : return "\\";
@@ -21,6 +21,33 @@ char const * cc_step_link_type_symbol( CcStepLinkTypeEnum sle ) {
     }
 }
 
+CcMaybeBoolEnum cc_step_link_type_is_congruent( CcStepLinkTypeEnum slte_1,
+                                                CcStepLinkTypeEnum slte_2 ) {
+    if ( !CC_STEP_LINK_TYPE_IS_ENUMERATOR( slte_2 ) ) return CC_MBE_Void;
+    if ( slte_2 == CC_SLTE_None ) return CC_MBE_False;
+
+    switch ( slte_1 ) {
+        case CC_SLTE_None : return CC_MBE_False;
+
+        case CC_SLTE_InitialPosition : return CC_BOOL_TO_MAYBE( slte_2 == CC_SLTE_InitialPosition );
+
+        case CC_SLTE_Reposition : return CC_BOOL_TO_MAYBE( slte_2 == CC_SLTE_Reposition );
+
+        case CC_SLTE_Next :
+        case CC_SLTE_Distant :
+        case CC_SLTE_Destination :
+        case CC_SLTE_JustDestination : {
+            return CC_BOOL_TO_MAYBE( slte_2 == CC_SLTE_Next || \
+                                     slte_2 == CC_SLTE_Distant || \
+                                     slte_2 == CC_SLTE_Destination || \
+                                     slte_2 == CC_SLTE_JustDestination );
+        }
+
+        default : return CC_MBE_Void;
+    }
+}
+
+
 CcStep * cc_step__new( CcStepLinkTypeEnum link,
                        CcPos field,
                        CcSideEffect side_effect ) {
@@ -30,6 +57,8 @@ CcStep * cc_step__new( CcStepLinkTypeEnum link,
     step__a->link = link;
     step__a->field = field;
     step__a->side_effect = side_effect;
+
+    step__a->tentative__d = NULL;
 
     step__a->next = NULL;
 
@@ -79,7 +108,8 @@ CcStep * cc_step_append_next_no_side_effect( CcStep ** steps__iod_a,
     return cc_step_append( steps__iod_a, CC_SLTE_Next, field, cc_side_effect_none() );
 }
 
-CcStep * cc_step_duplicate_all__new( CcStep * steps ) {
+CcStep * cc_step_duplicate_all__new( CcStep * steps,
+                                     bool include_tentative ) {
     if ( !steps ) return NULL;
 
     CcStep * steps__a = NULL;
@@ -93,6 +123,20 @@ CcStep * cc_step_duplicate_all__new( CcStep * steps ) {
         if ( !step__w ) { // Failed append --> ownership not transferred ...
             cc_step_free_all( &steps__a );
             return NULL;
+        }
+
+        if ( include_tentative && from->tentative__d ) {
+            CcSideEffectLink * sel__t = cc_side_effect_link_duplicate_all__new( from->tentative__d );
+            if ( !sel__t ) {
+                cc_step_free_all( &steps__a );
+                return NULL;
+            }
+
+            if ( !cc_side_effect_link_extend( &( step__w->tentative__d ), &sel__t ) ) {
+                cc_side_effect_link_free_all( &sel__t ); // If cc_side_effect_link_extend() failed, ownership was not transferred.
+                cc_step_free_all( &steps__a );
+                return NULL;
+            }
         }
 
         from = from->next;
@@ -126,15 +170,37 @@ CcStep * cc_step_extend( CcStep ** steps__iod_a,
     return last->next;
 }
 
-size_t cc_step_count( CcStep * steps ) {
+size_t cc_step_count( CcStep * steps, bool do_momentum ) {
     if ( !steps ) return 0;
 
     size_t count = 0;
     CcStep * s = steps;
 
-    while ( s ) {
-        ++count;
-        s = s->next;
+    if ( do_momentum ) {
+        if ( s->link == CC_SLTE_InitialPosition ) {
+            s = s->next;
+
+            if ( !s ) return 0;
+
+            if ( s->link == CC_SLTE_Reposition ) {
+                s = s->next;
+            } else if ( s->link != CC_SLTE_Next )
+                return 0;
+        } else
+            return 0;
+
+        while ( s ) {
+            if ( s->link == CC_SLTE_Next ) {
+                ++count;
+                s = s->next;
+            } else
+                return 0;
+        }
+    } else {
+        while ( s ) {
+            ++count;
+            s = s->next;
+        }
     }
 
     return count;
@@ -206,31 +272,91 @@ CcSideEffect * cc_step_fetch_last_side_effect( CcStep * steps ) {
     return &( last->side_effect );
 }
 
+CcMaybeBoolEnum cc_step_is_congruent( CcStep * step, CcStep * step_path ) {
+    if ( !step ) return CC_MBE_Void;
+    if ( !step_path ) return CC_MBE_Void;
+
+    // Tentative side-effects are used only for displacements, when building complete
+    // path a piece can make; they have no place in a step parsed from user notation.
+    if ( step->tentative__d ) return CC_MBE_Void;
+
+    CcMaybeBoolEnum result = cc_step_link_type_is_congruent( step->link, step_path->link );
+    if ( result != CC_MBE_True ) return result;
+
+    if ( !cc_pos_is_congruent( step->field, step_path->field ) ) return CC_MBE_False;
+
+    result = cc_side_effect_is_congruent( step->side_effect, step_path->side_effect );
+    if ( !CC_MAYBE_BOOL_IS_VALID( result ) ) return CC_MBE_Void;
+    if ( result == CC_MBE_True ) return CC_MBE_True;
+
+    if ( step_path->tentative__d ) {
+        CcSideEffectLink * sel = step_path->tentative__d;
+        result = CC_MBE_False;
+
+        while ( sel ) {
+            result = cc_side_effect_is_congruent( step->side_effect, sel->side_effect );
+            if ( !CC_MAYBE_BOOL_IS_VALID( result ) ) return CC_MBE_Void;
+            if ( result == CC_MBE_True ) break;
+            sel = sel->next;
+        }
+    }
+
+    return result;
+}
+
 bool cc_step_free_all( CcStep ** steps__f ) {
     if ( !steps__f ) return false;
     if ( !*steps__f ) return true;
 
     CcStep * s = *steps__f;
+    bool result = true;
 
     while ( s ) {
         CcStep * tmp = s->next;
+
+        if ( s->tentative__d )
+            result = cc_side_effect_link_free_all( &( s->tentative__d ) ) && result;
+
         CC_FREE( s );
         s = tmp;
     }
 
     *steps__f = NULL;
-    return true;
+    return result;
+}
+
+static size_t _cc_step_sum_len_all_tentative( CcStep * steps ) {
+    if ( !steps ) return 0;
+
+    size_t len = 0;
+    CcStep * s = steps;
+
+    while ( s ) {
+        if ( s->tentative__d ) {
+            len += cc_side_effect_link_len( s->tentative__d );
+        }
+
+        s = s->next;
+    }
+
+    return len;
 }
 
 char * cc_step_all_to_string__new( CcStep * steps ) {
     if ( !steps ) return NULL;
 
+    size_t se_len = _cc_step_sum_len_all_tentative( steps ); // length of all tentative__d side-effects in a complete linked list
+
     // unused len is certainly > 0, because steps != NULL
-    size_t steps_len = cc_step_count( steps ) *
-                       ( CC_MAX_LEN_CHAR_8 + CC_MAX_LEN_CHAR_16 + 2 );
+    size_t steps_len = cc_step_count( steps, false ) *
+                       ( CC_MAX_LEN_CHAR_8 + CC_MAX_LEN_CHAR_16 + 2 ) +
                        // CC_MAX_LEN_CHAR_8, for position
                        // + CC_MAX_LEN_CHAR_16, for side-effect
                        // + 2, for step links, e.g. ".." before step
+                       ( se_len * ( CC_MAX_LEN_CHAR_16 + 1 ) + 2 );
+                       // CC_MAX_LEN_CHAR_16, for each side-effect
+                       // + 1, for ',' between every two side-effects
+                       // + 2, for '{' and '}' enclosing tentative__d side-effects list
 
     size_t steps_size = steps_len + 1; // +1, for '\0'
 
@@ -281,6 +407,28 @@ char * cc_step_all_to_string__new( CcStep * steps ) {
         }
         steps_str = (char *)se_end__w;
 
+        if ( s->tentative__d ) {
+            char * sel_end__a = cc_side_effect_link_to_string__new( s->tentative__d );
+            if ( !sel_end__a ) {
+                CC_FREE( steps_str__a );
+                return NULL;
+            }
+
+            *steps_str++ = '{';
+
+            char const * se_list__w = cc_str_append_into( steps_str, steps_end__w, CC_SIZE_IGNORE, sel_end__a, NULL, CC_MAX_LEN_ZERO_TERMINATED );
+            if ( !se_list__w ) {
+                CC_FREE( sel_end__a );
+                CC_FREE( steps_str__a );
+                return NULL;
+            }
+            steps_str = (char *)sel_end__a;
+
+            *steps_str++ = '}';
+
+            CC_FREE( sel_end__a );
+        }
+
         s = s->next;
     }
 
@@ -310,9 +458,9 @@ CcStep * cc_step_displacement__new( CcStepLinkTypeEnum link, CcPos field,
 }
 
 CcStep * cc_step_en_passant__new( CcStepLinkTypeEnum link, CcPos field,
-                                  CcPieceTagType pawn,
+                                  CcPieceTagType private,
                                   CcPos distant ) {
-    CcSideEffect se = cc_side_effect_en_passant( pawn, distant );
+    CcSideEffect se = cc_side_effect_en_passant( private, distant );
     return cc_step__new( link, field, se );
 }
 
@@ -397,9 +545,9 @@ CcStep * cc_step_displacement_append( CcStep ** steps__iod_a,
 CcStep * cc_step_en_passant_append( CcStep ** steps__iod_a,
                                     CcStepLinkTypeEnum link,
                                     CcPos field,
-                                    CcPieceTagType pawn,
+                                    CcPieceTagType private,
                                     CcPos distant ) {
-    CcSideEffect se = cc_side_effect_en_passant( pawn, distant );
+    CcSideEffect se = cc_side_effect_en_passant( private, distant );
     return cc_step_append( steps__iod_a, link, field, se );
 }
 

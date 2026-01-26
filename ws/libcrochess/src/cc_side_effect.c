@@ -6,6 +6,8 @@
 #include "cc_defines.h"
 #include "cc_side_effect.h"
 
+//
+// Side-effect.
 
 char const * cc_side_effect_type_symbol( CcSideEffectTypeEnum sete ) {
     switch ( sete ) {
@@ -64,7 +66,7 @@ CcSideEffect cc_side_effect( CcSideEffectTypeEnum type,
         sse.displacement.piece = piece;
         sse.displacement.destination = destination;
     } else if ( sse.type == CC_SETE_EnPassant ) {
-        sse.en_passant.pawn = piece;
+        sse.en_passant.private = piece;
         sse.en_passant.distant = destination;
     } else if ( sse.type == CC_SETE_Castle ) {
         sse.castle.rook = piece;
@@ -100,7 +102,7 @@ CcPieceTagType cc_side_effect_piece( CcSideEffect se ) {
         case CC_SETE_None : return CC_PTE_None;
         case CC_SETE_Capture : return se.capture.piece;
         case CC_SETE_Displacement : return se.displacement.piece;
-        case CC_SETE_EnPassant : return se.en_passant.pawn;
+        case CC_SETE_EnPassant : return se.en_passant.private;
         case CC_SETE_Castle : return se.castle.rook;
         case CC_SETE_Promotion : return se.promote.promoted_to;
         case CC_SETE_TagForPromotion : return CC_PTE_None;
@@ -159,6 +161,179 @@ bool cc_side_effect_has_destination( CcSideEffect se ) {
     }
 }
 
+bool cc_side_effect_is_valid( CcSideEffect se, bool include_none ) {
+    if ( include_none ) {
+        if ( !CC_SIDE_EFFECT_TYPE_IS_ENUMERATOR( se.type ) ) return false;
+    } else {
+        if ( !CC_SIDE_EFFECT_TYPE_IS_VALID( se.type ) ) return false;
+    }
+
+    switch ( se.type ) {
+        case CC_SETE_None : return true;
+
+        case CC_SETE_Capture : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.capture.piece ) ) return false;
+            if ( !CC_PIECE_CAN_BE_CAPTURED( se.capture.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_Displacement : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.displacement.piece ) ) return false;
+            if ( !( CC_PIECE_CAN_BE_DISPLACED( se.displacement.piece )
+                    || CC_PIECE_CAN_BE_DISPLACED_TRANCE_JOURNEY( se.displacement.piece ) ) )
+                        return false;
+            if ( !CC_POS_IS_VALID( se.displacement.destination ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_EnPassant : {
+            // if ( !CC_PIECE_IS_ENUMERATOR( se.en_passant.private ) ) return false; // Not needed, CC_PIECE_CAN_BE_CAPTURED_EN_PASSANT() enumerates privates.
+            if ( !CC_PIECE_CAN_BE_CAPTURED_EN_PASSANT( se.en_passant.private ) ) return false;
+            if ( !CC_POS_IS_VALID( se.en_passant.distant ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_Castle : {
+            // if ( !CC_PIECE_IS_ENUMERATOR( se.castle.rook ) ) return false; // Not needed, CC_PIECE_IS_ROOK() enumerates Rooks.
+            if ( !CC_PIECE_IS_ROOK( se.castle.rook ) ) return false;
+            if ( !CC_POS_IS_VALID( se.castle.start ) ) return false;
+            if ( !CC_POS_IS_VALID( se.castle.destination ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_Promotion : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.promote.captured ) ) return false;
+            if ( !( ( se.promote.captured == CC_PTE_None )
+                      || CC_PIECE_CAN_BE_CAPTURED( se.promote.captured ) ) )
+                        return false;
+            if ( !CC_PIECE_IS_VALID( se.promote.promoted_to ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_TagForPromotion : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.tag_for_promotion.captured ) ) return false;
+            if ( !( ( se.tag_for_promotion.captured == CC_PTE_None )
+                      || CC_PIECE_CAN_BE_CAPTURED( se.tag_for_promotion.captured ) ) )
+                        return false;
+            return true;
+        }
+
+        case CC_SETE_Conversion : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.convert.piece ) ) return false;
+            if ( !CC_PIECE_CAN_BE_CONVERTED( se.convert.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_FailedConversion : return true;
+
+        case CC_SETE_Transparency : {
+            // if ( !CC_PIECE_IS_ENUMERATOR( se.transparency.piece ) ) return false; // Not needed, CC_PIECE_IS_TRANSPARENT() enumerates transparent pieces.
+            if ( !CC_PIECE_IS_TRANSPARENT( se.transparency.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_Divergence : {
+            // if ( !CC_PIECE_IS_ENUMERATOR( se.diversion.piece ) ) return false; // Not needed, CC_PIECE_IS_DIVERGENT() enumerates divergent pieces.
+            if ( !CC_PIECE_IS_DIVERGENT( se.diversion.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_DemoteToPawn : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.demote.piece ) ) return false;
+            if ( !CC_PIECE_CAN_BE_DEMOTED( se.demote.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_Resurrection :
+        case CC_SETE_ResurrectingOpponent : {
+            if ( !CC_PIECE_IS_ENUMERATOR( se.resurrect.piece ) ) return false;
+            if ( !CC_PIECE_CAN_BE_RESURRECTED( se.resurrect.piece ) ) return false;
+            return true;
+        }
+
+        case CC_SETE_FailedResurrection : return true;
+
+        default : return false;
+    }
+}
+
+CcMaybeBoolEnum cc_side_effect_is_congruent( CcSideEffect se_1, CcSideEffect se_2 ) {
+    if ( !cc_side_effect_is_valid( se_1, true ) ) return CC_MBE_Void;
+    if ( !cc_side_effect_is_valid( se_2, true ) ) return CC_MBE_Void;
+
+    if ( se_1.type != se_2.type ) return CC_MBE_False; // [1]
+
+    switch ( se_1.type ) {
+        case CC_SETE_None : return CC_MBE_True; // se_2.type is also CC_SETE_None, checked at [1].
+
+        case CC_SETE_Capture : {
+            if ( !cc_piece_has_same_type( se_1.capture.piece, se_2.capture.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Displacement : {
+            if ( !cc_piece_has_same_type( se_1.displacement.piece, se_2.displacement.piece, false ) ) return CC_MBE_False;
+            if ( !CC_POS_IS_EQUAL( se_1.displacement.destination, se_2.displacement.destination ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_EnPassant : {
+            if ( !cc_piece_has_same_type( se_1.en_passant.private, se_2.en_passant.private, false ) ) return CC_MBE_False;
+            if ( !CC_POS_IS_EQUAL( se_1.en_passant.distant, se_2.en_passant.distant ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Castle : {
+            if ( !cc_piece_has_same_type( se_1.castle.rook, se_2.castle.rook, false ) ) return CC_MBE_False;
+            if ( !CC_POS_IS_EQUAL( se_1.castle.start, se_2.castle.start ) ) return CC_MBE_False;
+            if ( !CC_POS_IS_EQUAL( se_1.castle.destination, se_2.castle.destination ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Promotion : {
+            if ( !cc_piece_has_same_type( se_1.promote.captured, se_2.promote.captured, false ) ) return CC_MBE_False;
+            if ( !cc_piece_has_same_type( se_1.promote.promoted_to, se_2.promote.promoted_to, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_TagForPromotion : {
+            if ( !cc_piece_has_same_type( se_1.tag_for_promotion.captured, se_2.tag_for_promotion.captured, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Conversion : {
+            if ( !cc_piece_has_same_type( se_1.convert.piece, se_2.convert.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_FailedConversion : return CC_MBE_True; // se_2.type is also CC_SETE_FailedConversion, checked at [1].
+
+        case CC_SETE_Transparency : {
+            if ( !cc_piece_has_same_type( se_1.transparency.piece, se_2.transparency.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Divergence : {
+            if ( !cc_piece_has_same_type( se_1.diversion.piece, se_2.diversion.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_DemoteToPawn : {
+            if ( !cc_piece_has_same_type( se_1.demote.piece, se_1.demote.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_Resurrection :
+        case CC_SETE_ResurrectingOpponent : {
+            if ( !cc_piece_has_same_type( se_1.resurrect.piece, se_2.resurrect.piece, false ) ) return CC_MBE_False;
+            return CC_MBE_True;
+        }
+
+        case CC_SETE_FailedResurrection : return CC_MBE_True; // se_2.type is also CC_SETE_FailedResurrection, checked at [1].
+
+        default : return CC_MBE_Void;
+    }
+}
 
 //
 // User-readable representation of a side-effect.
@@ -252,8 +427,8 @@ CcSideEffect cc_side_effect_displacement( CcPieceTagType piece, CcPos destinatio
                            CC_PTE_None );
 }
 
-CcSideEffect cc_side_effect_en_passant( CcPieceTagType pawn, CcPos distant ) {
-    return cc_side_effect( CC_SETE_EnPassant, pawn,
+CcSideEffect cc_side_effect_en_passant( CcPieceTagType private, CcPos distant ) {
+    return cc_side_effect( CC_SETE_EnPassant, private,
                            CC_POS_CAST_INVALID,
                            distant,
                            CC_PTE_None );
@@ -327,4 +502,148 @@ CcSideEffect cc_side_effect_failed_resurrection( void ) {
                            CC_POS_CAST_INVALID,
                            CC_POS_CAST_INVALID,
                            CC_PTE_None );
+}
+
+//
+// Side-effect linked list.
+
+CcSideEffectLink * cc_side_effect_link__new( CcSideEffect side_effect ) {
+    CcSideEffectLink * sel__t = CC_MALLOC( sizeof( CcSideEffectLink ) );
+    if ( !sel__t ) return NULL;
+
+    sel__t->side_effect = side_effect;
+    sel__t->next = NULL;
+
+    return sel__t;
+}
+
+CcSideEffectLink * cc_side_effect_link_append( CcSideEffectLink ** se_link__iod_a,
+                                               CcSideEffect side_effect ) {
+    if ( !se_link__iod_a ) return NULL;
+
+    CcSideEffectLink * sel__t = cc_side_effect_link__new( side_effect );
+    if ( !sel__t ) return NULL;
+
+    if ( !*se_link__iod_a ) {
+        *se_link__iod_a = sel__t; // Ownership transfer.
+    } else {
+        CcSideEffectLink * sel = *se_link__iod_a;
+        CC_FASTFORWARD( sel );
+        sel->next = sel__t; // Append + ownership transfer.
+    }
+
+    return sel__t; // Weak pointer.
+}
+
+CcSideEffectLink * cc_side_effect_link_duplicate_all__new( CcSideEffectLink * se_link ) {
+    if ( !se_link ) return NULL;
+
+    CcSideEffectLink * se_link__a = NULL;
+    CcSideEffectLink * from = se_link;
+
+    while ( from ) {
+        CcSideEffectLink * sel__w = cc_side_effect_link_append( &se_link__a, from->side_effect );
+        if ( !sel__w ) { // Failed append --> ownership not transferred ...
+            cc_side_effect_link_free_all( &se_link__a );
+            return NULL;
+        }
+
+        from = from->next;
+    }
+
+    return se_link__a;
+}
+
+CcSideEffectLink * cc_side_effect_link_extend( CcSideEffectLink ** se_link__iod_a,
+                                               CcSideEffectLink ** se_link__n ) {
+    if ( !se_link__iod_a ) return NULL;
+    if ( !se_link__n ) return NULL;
+
+    if ( !*se_link__n ) return *se_link__iod_a;
+
+    if ( !*se_link__iod_a ) {
+        // Ownership transfer.
+        *se_link__iod_a = *se_link__n;
+        *se_link__n = NULL;
+
+        return *se_link__iod_a;
+    }
+
+    CcSideEffectLink * last = *se_link__iod_a;
+    CC_FASTFORWARD( last );
+
+    // Ownership transfer.
+    last->next = *se_link__n;
+    *se_link__n = NULL;
+
+    return last->next;
+}
+
+bool cc_side_effect_link_free_all( CcSideEffectLink ** se_link__f ) {
+    if ( !se_link__f ) return false;
+    if ( !*se_link__f ) return true;
+
+    CcSideEffectLink * sel = *se_link__f;
+    CcSideEffectLink * tmp = NULL;
+
+    while ( sel ) {
+        tmp = sel->next;
+        CC_FREE( sel );
+        sel = tmp;
+    }
+
+    *se_link__f = NULL;
+    return true;
+}
+
+size_t cc_side_effect_link_len( CcSideEffectLink * se_link ) {
+    if ( !se_link ) return 0;
+
+    size_t len = 0;
+    CcSideEffectLink * sel = se_link;
+
+    while ( sel ) {
+        ++len;
+        sel = sel->next;
+    }
+
+    return len;
+}
+
+char * cc_side_effect_link_to_string__new( CcSideEffectLink * se_link ) {
+    if ( !se_link ) return NULL;
+
+    size_t len = cc_side_effect_link_len( se_link );
+    size_t size = len * ( CC_SIZE_CHAR_16 + 1 ); // +1 == ',' between each 2 side-effects
+
+    char * se_str__a = calloc( 1, size );
+    if ( !se_str__a ) return NULL;
+
+    char * se = se_str__a;
+    CcSideEffectLink * sel = se_link;
+    cc_char_16 se_str = CC_CHAR_16_EMPTY;
+
+    while ( sel ) {
+        if ( !cc_side_effect_to_str( sel->side_effect, &se_str ) ) {
+            CC_FREE( se_str__a );
+            return NULL;
+        }
+
+        se = cc_str_append_into( se, se_str__a + size, CC_SIZE_IGNORE, se_str, NULL, CC_SIZE_CHAR_16 );
+        if ( !se ) {
+            CC_FREE( se_str__a );
+            return NULL;
+        }
+
+        if ( sel->next ) *se++ = ',';
+
+        if ( !cc_str_pad( se_str, '\0', CC_SIZE_CHAR_16 ) ) {
+            CC_FREE( se_str__a );
+            return NULL;
+        }
+
+        sel = sel->next;
+    }
+
+    return se_str__a;
 }

@@ -14,7 +14,13 @@
 
 #define CC_STEP_LINK_TYPE_IS_VALID(sle) ( ( CC_SLTE_None < (sle) ) && ( (sle) <= CC_SLTE_JustDestination ) )
 
+// TODO :: DOCS
+#define CC_STEP_LINK_TYPE_IS_JUST_STEP(sle) ( ( (sle) == CC_SLTE_Next ) || ( (sle) == CC_SLTE_Distant ) )
+
 #define CC_STEP_LINK_TYPE_IS_DESTINATION(sle) ( ( (sle) == CC_SLTE_Destination ) || ( (sle) == CC_SLTE_JustDestination ) )
+
+// TODO :: DOCS
+#define CC_STEP_LINK_TYPE_IS_MOVEMENT(sle) ( CC_STEP_LINK_TYPE_IS_JUST_STEP(sle) || CC_STEP_LINK_TYPE_IS_DESTINATION(sle) )
 
 typedef enum CcStepLinkTypeEnum {
     CC_SLTE_None, /* Step link not found, uninitialized, not parsed yet, or error happened. */
@@ -26,7 +32,10 @@ typedef enum CcStepLinkTypeEnum {
     CC_SLTE_JustDestination, /* Just destination field, no separators, no other steps. */
 } CcStepLinkTypeEnum;
 
-char const * cc_step_link_type_symbol( CcStepLinkTypeEnum sle );
+char const * cc_step_link_type_symbol( CcStepLinkTypeEnum slte );
+
+CcMaybeBoolEnum cc_step_link_type_is_congruent( CcStepLinkTypeEnum slte_1,
+                                                CcStepLinkTypeEnum slte_2 );
 
 #define CC_MAX_LEN_STEP_LINK_TYPE_SYMBOL (2)
 
@@ -35,6 +44,8 @@ typedef struct CcStep {
     CcStepLinkTypeEnum link; /* Type of a link to previous step. */
     CcPos field; /* Field of a step. */
     CcSideEffect side_effect; /* Side-effect structure. */
+
+    CcSideEffectLink * tentative__d; /* Possible side-effects (e.g. displacements when building a path), a linked list. */
 
     struct CcStep * next; /* Next step in a linked list. */
 } CcStep;
@@ -61,12 +72,13 @@ CcStep * cc_step_append( CcStep ** steps__iod_a,
 CcStep * cc_step_append_next_no_side_effect( CcStep ** steps__iod_a,
                                              CcPos field );
 
-CcStep * cc_step_duplicate_all__new( CcStep * steps );
+CcStep * cc_step_duplicate_all__new( CcStep * steps,
+                                     bool include_tentative );
 
 CcStep * cc_step_extend( CcStep ** steps__iod_a,
                          CcStep ** steps__d_n );
 
-size_t cc_step_count( CcStep * steps );
+size_t cc_step_count( CcStep * steps, bool do_momentum );
 
 CcStep * cc_step_fetch_initial( CcStep * steps );
 
@@ -74,8 +86,11 @@ CcStep * cc_step_fetch_destination( CcStep * steps );
 
 CcSideEffect * cc_step_fetch_last_side_effect( CcStep * steps );
 
+CcMaybeBoolEnum cc_step_is_congruent( CcStep * step, CcStep * step_path );
+
 bool cc_step_free_all( CcStep ** steps__f );
 
+// static size_t _cc_step_sum_len_all_tentative( CcStep * steps );
 char * cc_step_all_to_string__new( CcStep * steps );
 
 
@@ -89,7 +104,7 @@ CcStep * cc_step_displacement__new( CcStepLinkTypeEnum link, CcPos field,
                                     CcPos destination );
 
 CcStep * cc_step_en_passant__new( CcStepLinkTypeEnum link, CcPos field,
-                                  CcPieceTagType pawn,
+                                  CcPieceTagType private,
                                   CcPos distant );
 
 CcStep * cc_step_castle__new( CcStepLinkTypeEnum link, CcPos field,
@@ -138,7 +153,7 @@ CcStep * cc_step_displacement_append( CcStep ** steps__iod_a,
 CcStep * cc_step_en_passant_append( CcStep ** steps__iod_a,
                                     CcStepLinkTypeEnum link,
                                     CcPos field,
-                                    CcPieceTagType pawn,
+                                    CcPieceTagType private,
                                     CcPos distant );
 
 CcStep * cc_step_castle_append( CcStep ** steps__iod_a,

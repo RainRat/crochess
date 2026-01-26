@@ -31,12 +31,30 @@ Data
     :param sle: Step link enumeration, :c:enum:`CcStepLinkTypeEnum` value.
     :returns: :c:data:`true` if valid enumerator, :c:data:`false` otherwise.
 
+.. c:macro:: CC_STEP_LINK_TYPE_IS_JUST_STEP(sle)
+
+    Macro to check if a given step link is just a step, either immediate or
+    distant step.
+
+    :param sle: Step link enumeration, :c:enum:`CcStepLinkTypeEnum` value.
+    :returns: :c:data:`true` if just a step, :c:data:`false` otherwise.
+
 .. c:macro:: CC_STEP_LINK_TYPE_IS_DESTINATION(sle)
 
     Macro to check if a given step link is destination.
 
     :param sle: Step link enumeration, :c:enum:`CcStepLinkTypeEnum` value.
     :returns: :c:data:`true` if destination, :c:data:`false` otherwise.
+
+.. c:macro:: CC_STEP_LINK_TYPE_IS_MOVEMENT(sle)
+
+    Macro to check if a given step link is a movement, either just a step
+    or a destination.
+
+    :param sle: Step link enumeration, :c:enum:`CcStepLinkTypeEnum` value.
+    :returns: :c:data:`true` if movement, :c:data:`false` otherwise.
+    :seealso: :c:macro:`CC_STEP_LINK_TYPE_IS_JUST_STEP()`,
+        :c:macro:`CC_STEP_LINK_TYPE_IS_DESTINATION()`
 
 .. c:enum:: CcStepLinkTypeEnum
 
@@ -92,6 +110,16 @@ Data
 
         Side-effect structure.
 
+    .. c:member:: CcSideEffectLink * tentative__d
+
+        Possible side-effects, a linked list; it's used for displacements
+        when building a path tree. Usually, it's not used, so it's denoted
+        as *optional*.
+
+        .. note::
+
+            Even though this linked list is *optional*, pointer does have
+            ownership when linked list is present.
 
     .. c:member:: struct CcStep * next
 
@@ -104,15 +132,32 @@ Data
 Functions
 ---------
 
-.. c:function:: char const * cc_step_link_type_symbol( CcStepLinkTypeEnum sle )
+.. c:function:: char const * cc_step_link_type_symbol( CcStepLinkTypeEnum slte )
 
     Function returns string symbol, as used in algebraic notation,
     for a given step link.
 
     Returned string is not allocated, so do not :c:func:`free()` it.
 
-    :param sle: A step linkage.
+    :param slte: A step linkage.
     :returns: String symbol if link is valid, :c:data:`NULL` otherwise.
+
+.. c:function:: CcMaybeBoolEnum cc_step_link_type_is_congruent( CcStepLinkTypeEnum slte_1, CcStepLinkTypeEnum slte_2 )
+
+    Function checks if two given step linkages are congruent.
+
+    For movement linkages (i.e. :c:enumerator:`CC_SLTE_Next`, :c:enumerator:`CC_SLTE_Distant`,
+    :c:enumerator:`CC_SLTE_Destination`, :c:enumerator:`CC_SLTE_JustDestination`), given
+    enumerators have to be in the same group; for all other linkages enumerators have
+    to be the same.
+
+    :param slte_1: A step linkage.
+    :param slte_2: Other step linkage.
+    :returns: One of :c:enum:`CcMaybeBoolEnum` values:
+
+        * :c:enumerator:`CC_MBE_True` if given enumerators are congruent,
+        * :c:enumerator:`CC_MBE_False` if given enumerators are not congruent,
+        * :c:enumerator:`CC_MBE_Void` in case of an error, invalid data given.
 
 .. c:function:: CcStep * cc_step__new( CcStepLinkTypeEnum link, CcPos field, CcSideEffect side_effect )
 
@@ -183,11 +228,12 @@ Functions
     :returns: A weak pointer to newly allocated step if successful, :c:data:`NULL` otherwise.
     :seealso: :c:func:`cc_step_append()`
 
-.. c:function:: CcStep * cc_step_duplicate_all__new( CcStep * steps )
+.. c:function:: CcStep * cc_step_duplicate_all__new( CcStep * steps, bool include_tentative )
 
     Duplicates all given steps into a newly allocated linked list.
 
     :param sle: Linked list to duplicate.
+    :param include_tentative: Flag, whether :c:member:`CcStep.tentative__d` should also be duplicated, or not.
     :returns: A newly allocated steps if successful, :c:data:`NULL` otherwise.
 
 .. c:function:: CcStep * cc_step_extend( CcStep ** steps__iod_a, CcStep ** steps__d_n )
@@ -209,11 +255,18 @@ Functions
     :returns: Weak pointer to extended portion of a linked list if successful,
               :c:data:`NULL` otherwise.
 
-.. c:function:: size_t cc_step_count( CcStep * steps )
+.. c:function:: size_t cc_step_count( CcStep * steps, bool do_momentum )
 
-    Function returning count of steps.
+    Function returning count of steps, or momentum, depending on a given flag.
+
+    For momentum, given :c:var:`steps` has to be linked as next, i.e. with
+    :c:enumerator:`CC_SLTE_Next` link type; and only those steps are counted
+    towards momentum. First step has to be initial one (i.e. has to have
+    :c:enumerator:`CC_SLTE_InitialPosition` link type), and second can be
+    repositioning step (i.e. :c:enumerator:`CC_SLTE_Reposition`).
 
     :param steps: Linked list of steps.
+    :param do_momentum: Flag, whether to count momentum, or any steps.
     :returns: Count of steps if successful, ``0`` otherwise.
 
 .. c:function:: CcStep * cc_step_fetch_initial( CcStep * steps )
@@ -243,6 +296,32 @@ Functions
     :param steps: Linked list of steps.
     :returns: Side-effect if successful, :c:data:`NULL` otherwise.
     :seealso: :c:func:`cc_step_fetch_destination()`
+
+.. c:function:: CcMaybeBoolEnum cc_step_is_congruent( CcStep * step, CcStep * step_path )
+
+    Function checks if a given :c:var:`step_path` is congruent with :c:var:`step`.
+
+    Steps are congruent if they are congruent in their link types, positions and
+    side-effects.
+
+    Step parsed from user notation (i.e. :c:var:`step`) should not contain
+    :c:member:`CcStep.tentative__d`; step from generated path (i.e. :c:var:`step_path`)
+    can contain tentative side-effects.
+
+    Side-effect from :c:var:`step` is compared with the one from :c:var:`step_path`.
+    If not congruent, then the first side-effect is compared against all tentative
+    side-effects from :c:var:`step_path`.
+
+    :param step: A parsed step, from user notation.
+    :param step_path: A step in a generated path a piece can take.
+    :returns: One of :c:enum:`CcMaybeBoolEnum` values:
+
+        * :c:enumerator:`CC_MBE_True` if given steps are congruent,
+        * :c:enumerator:`CC_MBE_False` if given steps are not congruent,
+        * :c:enumerator:`CC_MBE_Void` in case of an error, insufficient data given.
+
+    :seealso: :c:func:`cc_step_link_type_is_congruent()`, :c:func:`cc_pos_is_congruent()`,
+        :c:func:`cc_side_effect_is_congruent()`
 
 .. c:function:: bool cc_step_free_all( CcStep ** steps__f )
 
@@ -284,7 +363,7 @@ New step functions
 
 .. c:function:: CcStep * cc_step_displacement__new( CcStepLinkTypeEnum link, CcPos field, CcPieceTagType piece, CcPos destination )
 
-.. c:function:: CcStep * cc_step_en_passant__new( CcStepLinkTypeEnum link, CcPos field, CcPieceTagType pawn, CcPos distant )
+.. c:function:: CcStep * cc_step_en_passant__new( CcStepLinkTypeEnum link, CcPos field, CcPieceTagType private, CcPos distant )
 
 .. c:function:: CcStep * cc_step_castle__new( CcStepLinkTypeEnum link, CcPos field, CcPieceTagType rook, CcPos start, CcPos destination )
 
@@ -320,7 +399,7 @@ Append step functions
 
 .. c:function:: CcStep * cc_step_displacement_append( CcStep ** steps__iod_a, CcStepLinkTypeEnum link, CcPos field, CcPieceTagType piece, CcPos destination )
 
-.. c:function:: CcStep * cc_step_en_passant_append( CcStep ** steps__iod_a, CcStepLinkTypeEnum link, CcPos field, CcPieceTagType pawn, CcPos distant )
+.. c:function:: CcStep * cc_step_en_passant_append( CcStep ** steps__iod_a, CcStepLinkTypeEnum link, CcPos field, CcPieceTagType private, CcPos distant )
 
 .. c:function:: CcStep * cc_step_castle_append( CcStep ** steps__iod_a, CcStepLinkTypeEnum link, CcPos field, CcPieceTagType rook, CcPos start, CcPos destination )
 

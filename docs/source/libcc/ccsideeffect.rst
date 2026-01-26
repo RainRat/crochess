@@ -182,9 +182,9 @@ Data
 
             En passant.
 
-            .. c:member:: CcPieceTagType pawn
+            .. c:member:: CcPieceTagType private
 
-                Pawn which has been captured.
+                Private which has been captured.
 
             .. c:member:: CcPos distant
 
@@ -335,6 +335,30 @@ Functions
     :param se: A side-effect.
     :returns: :c:data:`true` if destination is present, :c:data:`false` otherwise.
 
+.. c:function:: bool cc_side_effect_is_valid( CcSideEffect se, bool include_none )
+
+    Function checks if a given side-effect is valid.
+
+    :param se: A side-effect.
+    :param include_none: Flag, whether an :c:enumerator:`CC_SETE_None` side-effect
+        should be included as valid, or not.
+    :returns: :c:data:`true` if side-effect is valid, :c:data:`false` otherwise.
+
+.. c:function:: CcMaybeBoolEnum cc_side_effect_is_congruent( CcSideEffect se_1, CcSideEffect se_2 )
+
+    Function checks if a given side-effects are congruent.
+
+    Side-effects are congruent if they are the same in type, all positions,
+    while pieces can differ in tags (but not in types or colors).
+
+    :param se_1: A side-effect.
+    :param se_2: Other side-effect.
+    :returns: One of :c:enum:`CcMaybeBoolEnum` values:
+
+        * :c:enumerator:`CC_MBE_True` if given side-effects are congruent,
+        * :c:enumerator:`CC_MBE_False` if given side-effects are not congruent,
+        * :c:enumerator:`CC_MBE_Void` in case of an error, invalid data given.
+
 .. c:function:: bool cc_side_effect_to_str( CcSideEffect se, cc_char_16 * se_str__o )
 
     Function returns string, containing user-readable representation
@@ -361,7 +385,7 @@ Functions
 
 .. c:function:: CcSideEffect cc_side_effect_displacement( CcPieceTagType piece, CcPos destination )
 
-.. c:function:: CcSideEffect cc_side_effect_en_passant( CcPieceTagType pawn, CcPos distant )
+.. c:function:: CcSideEffect cc_side_effect_en_passant( CcPieceTagType private, CcPos distant )
 
 .. c:function:: CcSideEffect cc_side_effect_castle( CcPieceTagType rook, CcPos start, CcPos destination )
 
@@ -382,6 +406,96 @@ Functions
 .. c:function:: CcSideEffect cc_side_effect_resurrect( CcPieceTagType piece, CcPos destination )
 
 .. c:function:: CcSideEffect cc_side_effect_failed_resurrection( void )
+
+.. _lbl-libcc-ccsideeffect-linkedsideeffects:
+
+Linked side-effects
+-------------------
+
+.. c:struct:: CcSideEffectLink
+
+    Linked side-effects :c:`struct`\ure, linked list.
+
+    .. c:member:: CcSideEffect side_effect
+
+        A side-effect.
+
+    .. c:member:: struct CcSideEffectLink * next
+
+        Next side-effect in a linked list.
+
+    :c:`struct` is tagged with the same :c:struct:`CcSideEffectLink` name.
+
+.. c:function:: CcSideEffectLink * cc_side_effect_link__new( CcSideEffect side_effect )
+
+    Returns a newly allocated side-effect link.
+
+    :param side_effect: A side-effect.
+    :returns: A newly allocated side-effect link if successful, :c:data:`NULL` otherwise.
+
+.. c:function:: CcSideEffectLink * cc_side_effect_link_append( CcSideEffectLink ** se_link__iod_a, CcSideEffect side_effect )
+
+    Appends a newly allocated side-effect link to a given linked list.
+
+    If linked list :c:`*se_link__iod_a` is :c:data:`NULL`, it will be initialized
+    with a newly allocated side-effect link as its only element.
+
+    :param se_link__iod_a: **Ownership**, *optional* *input/output* parameter;
+        linked list of side-effects to which a new side-effect is appended, inner pointer
+        can be :c:data:`NULL`.
+    :param side_effect: A side-effect.
+    :returns: A weak pointer to newly allocated side-effect link if successful,
+        :c:data:`NULL` otherwise.
+
+.. c:function:: CcSideEffectLink * cc_side_effect_link_duplicate_all__new( CcSideEffectLink * se_link )
+
+    Duplicates all given side-effects into a newly allocated linked list.
+
+    :param se_link: Linked list to duplicate.
+    :returns: A newly allocated linked list if successful, :c:data:`NULL` otherwise.
+
+.. c:function:: CcSideEffectLink * cc_side_effect_link_extend( CcSideEffectLink ** se_link__iod_a, CcSideEffectLink ** se_link__n )
+
+    Extends given linked list of side-effects with another.
+
+    If linked list to extend (:c:`se_link__iod_a`) hasn't been allocated yet,
+    this will initialize it with content of an extending linked list, i.e.
+    :c:`se_link__n`.
+
+    .. note::
+
+        Extending linked list :c:`se_link__n` has its ownership transferred to
+        extended linked list :c:`se_link__iod_a`; as a result, inner pointer
+        :c:`*se_link__n` is :c:data:`NULL`\ed.
+
+    :param se_link__iod_a: **Ownership**, *optional* *input/output*; linked list to extend.
+    :param se_link__n: **Ownership transfer**, *optional*; linked list to extend existing side-effects.
+    :returns: Weak pointer to extended portion of a linked list if successful,
+              :c:data:`NULL` otherwise.
+
+.. c:function:: bool cc_side_effect_link_free_all( CcSideEffectLink ** se_link__f )
+
+    Frees all side-effects in a linked list.
+
+    :param se_link__f: Linked list of side-effects.
+    :returns: :c:data:`true` if successful, :c:data:`false` otherwise.
+
+.. c:function:: size_t cc_side_effect_link_len( CcSideEffectLink * se_link )
+
+    Function returning length of linked list of side-effects.
+
+    :param se_link: Linked list of side-effects.
+    :returns: Length if successful, ``0`` otherwise.
+
+.. c:function:: char * cc_side_effect_link_to_string__new( CcSideEffectLink * se_link )
+
+    Function returns a newly allocated string, containing user-readable
+    representation of side-effects in a given linked list, separated by
+    ``','`` (comma); e.g. ``"<b8,<c9,<d8,<c7"``.
+
+    :param se_link: Linked list of side-effects.
+    :returns: A newly allocated, null-terminated string if successful,
+              :c:data:`NULL` otherwise
 
 .. _lbl-libcc-ccsideeffect-sourcecodeheader:
 

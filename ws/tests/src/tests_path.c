@@ -141,13 +141,73 @@ bool test_path_tree( CcPosDesc move_from,
         printf( "%s\nPath link test ok.\n", pl_str__a );
         CC_FREE( pl_str__a );
 
-        printf( ".......................................................................\n" );
+        printf( ":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n" );
 
         CcPathNode * pn = path_node__a;
 
         if ( cc_path_node_iter_init( &pn ) ) {
+            char * pn_steps_str__a = cc_step_all_to_string__new( pn->steps );
+            printf( "Root: %p->'%s'.\n", (void*)pn, pn_steps_str__a );
+            CC_FREE_AND_NULL( &pn_steps_str__a );
+
             while ( CC_MBE_True == cc_path_node_iter_next( &pn ) ) {
-                printf( "Node: %p.\n", (void*)pn );
+                printf( ".......................................................................\n" );
+
+                pn_steps_str__a = cc_step_all_to_string__new( pn->steps );
+                printf( "Node: %p->'%s'.\n", (void*)pn, pn_steps_str__a );
+                CC_FREE_AND_NULL( &pn_steps_str__a );
+
+                CcPathLink * pl__a = NULL;
+
+                if ( !cc_path_link_from_nodes( pn, &pl__a ) ) {
+                    cc_path_link_free_all( &pl__a );
+                    cc_path_node_free_all( &path_node__a );
+                    cc_path_context_free_all( &path_ctx__a );
+                    cc_game_free_all( &game__a );
+                    return false;
+                }
+
+                #ifdef __CC_DEBUG__
+                {
+                    printf( "vvv\n" );
+                    CcPathLink * pl = pl__a;
+
+                    while ( pl ) {
+                        printf( "...\n" );
+                        CcStep * s = pl->node__w->steps;
+
+                        char * steps_str__a = cc_step_all_to_string__new( s );
+                        printf( "%p->%d|%d:%d|%d:%d|'%s'.\n",
+                                (void*)pn, !CC_PATH_NODE_HAS_CONTINUATION( pn ),
+                                pn->visited, CC_PATH_NODE_ALL_SUBNODES_ARE_VISITED( pn ),
+                                pn->yielded, CC_PATH_NODE_ALL_SUBNODES_ARE_YIELDED( pn ),
+                                steps_str__a );
+                        CC_FREE_AND_NULL( &steps_str__a );
+
+                        pl = pl->next;
+                    }
+
+                    printf( "^^^\n" );
+                }
+                #endif // __CC_DEBUG__
+
+                CcStep * steps__a = NULL;
+
+                if ( !cc_path_link_to_steps( pl__a, &steps__a ) ) {
+                    cc_step_free_all( &steps__a );
+                    cc_path_link_free_all( &pl__a );
+                    cc_path_node_free_all( &path_node__a );
+                    cc_path_context_free_all( &path_ctx__a );
+                    cc_game_free_all( &game__a );
+                    return false;
+                }
+
+                char * steps_str__a = cc_step_all_to_string__new( steps__a );
+                printf( "Steps: '%s'.\n", steps_str__a );
+                CC_FREE_AND_NULL( &steps_str__a );
+
+                cc_step_free_all( &steps__a );
+                cc_path_link_free_all( &pl__a );
             };
         } else {
             printf( "cc_path_node_iter_init() failed.\n" );
@@ -184,12 +244,12 @@ bool test_bishop_simple( char const * setup ) {
 }
 
 bool tests_path( int test_number ) {
-    if ( ( test_number < TEST_ALL_MOVES ) || ( 5 < test_number ) ) {
+    if ( ( test_number < TESTS_DO_ALL ) || ( 5 < test_number ) ) {
         printf( "No such a path test: '%d'.\n", test_number );
         return false;
     }
 
-    bool do_all_tests = ( test_number == TEST_ALL_MOVES );
+    bool do_all_tests = ( test_number == TESTS_DO_ALL );
     bool result = true;
 
     if ( ( test_number == 1 ) || do_all_tests )

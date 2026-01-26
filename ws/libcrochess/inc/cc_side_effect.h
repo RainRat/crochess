@@ -13,6 +13,8 @@
 #include "cc_tag.h"
 #include "cc_pos.h"
 
+//
+// Side-effect.
 
 #define CC_SIDE_EFFECT_TYPE_IS_ENUMERATOR(sete) ( ( CC_SETE_None <= (sete) ) && ( (sete) <= CC_SETE_FailedResurrection ) )
 
@@ -83,7 +85,7 @@ typedef struct CcSideEffect
         } displacement; /* Displacement, used during light Shaman's trance-journey. */
 
         struct {
-            CcPieceTagType pawn; /* Pawn which has been captured. */
+            CcPieceTagType private; /* Private which has been captured. */
             CcPos distant; /* Position at which Pawn has been captured. */
         } en_passant; /* En passant. */
 
@@ -138,7 +140,9 @@ CcPos cc_side_effect_destination( CcSideEffect se );
 
 bool cc_side_effect_has_destination( CcSideEffect se );
 
-// TODO :: check side-effect validity --> _cc_path_node_steps_are_valid()
+bool cc_side_effect_is_valid( CcSideEffect se, bool include_none );
+
+CcMaybeBoolEnum cc_side_effect_is_congruent( CcSideEffect se_1, CcSideEffect se_2 );
 
 bool cc_side_effect_to_str( CcSideEffect se,
                             cc_char_16 * se_str__o );
@@ -147,7 +151,7 @@ bool cc_side_effect_to_str( CcSideEffect se,
 CcSideEffect cc_side_effect_none( void );
 CcSideEffect cc_side_effect_capture( CcPieceTagType piece );
 CcSideEffect cc_side_effect_displacement( CcPieceTagType piece, CcPos destination );
-CcSideEffect cc_side_effect_en_passant( CcPieceTagType pawn, CcPos distant );
+CcSideEffect cc_side_effect_en_passant( CcPieceTagType private, CcPos distant );
 CcSideEffect cc_side_effect_castle( CcPieceTagType rook, CcPos start, CcPos destination );
 CcSideEffect cc_side_effect_promote( CcPieceTagType captured, CcPieceTagType promoted_to );
 CcSideEffect cc_side_effect_tag_for_promotion( CcPieceTagType captured );
@@ -158,6 +162,30 @@ CcSideEffect cc_side_effect_diversion( CcPieceTagType piece );
 CcSideEffect cc_side_effect_demote( CcPieceTagType piece, CcPos distant );
 CcSideEffect cc_side_effect_resurrect( CcPieceTagType piece, CcPos destination );
 CcSideEffect cc_side_effect_failed_resurrection( void );
+
+//
+// Side-effect linked list.
+
+typedef struct CcSideEffectLink {
+    CcSideEffect side_effect;
+    struct CcSideEffectLink * next;
+} CcSideEffectLink;
+
+CcSideEffectLink * cc_side_effect_link__new( CcSideEffect side_effect );
+
+CcSideEffectLink * cc_side_effect_link_append( CcSideEffectLink ** se_link__iod_a,
+                                               CcSideEffect side_effect );
+
+CcSideEffectLink * cc_side_effect_link_duplicate_all__new( CcSideEffectLink * se_link );
+
+CcSideEffectLink * cc_side_effect_link_extend( CcSideEffectLink ** se_link__iod_a,
+                                               CcSideEffectLink ** se_link__n );
+
+bool cc_side_effect_link_free_all( CcSideEffectLink ** se_link__f );
+
+size_t cc_side_effect_link_len( CcSideEffectLink * se_link );
+
+char * cc_side_effect_link_to_string__new( CcSideEffectLink * se_link );
 
 
 #endif /* __CC_SIDE_EFFECT_H__ */

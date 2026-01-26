@@ -28,13 +28,19 @@ typedef struct CcPathNode {
 
     CcActivationDesc act_desc; /* <i> Non-cached, stored data of CcPlyContext->act_desc as move, its plies progresses. */ /* Activation descriptor for a moving piece, its momentum usage and momentum it had after all performed steps. */
 
-    bool visited; // TODO :: DOCS
+    bool visited;
+    bool yielded;
 
     struct CcPathNode * fork;
     struct CcPathNode * alt;
-    struct CcPathNode * sub;
     struct CcPathNode * back__w; /* Back-link to parent node. */
 } CcPathNode;
+
+#define CC_PATH_NODE_IS_PARENT(path_node) ( (path_node)->fork || (path_node)->alt )
+
+#define CC_PATH_NODE_IS_LEAF(path_node) ( !CC_PATH_NODE_IS_PARENT( (path_node) ) )
+
+#define CC_PATH_NODE_HAS_CONTINUATION(path_node) ( (bool)((path_node)->fork) ) // ->alt replaces node, ->sub replaces side-effect of the last step in the current node
 
 //
 // Path node linkage.
@@ -43,12 +49,11 @@ typedef enum CcPathNodeLinkageEnum {
     CC_PNLE_None,
     CC_PNLE_Fork,
     CC_PNLE_Alt,
-    CC_PNLE_Sub,
 } CcPathNodeLinkageEnum;
 
-#define CC_PATH_NODE_LINKAGE_IS_ENUMERATOR(pnle) ( ( CC_PNLE_None <= (pnle) ) && ( (pnle) <= CC_PNLE_Sub ) ) // <!> Keep in-sync with CcPathNodeLinkageEnum.
+#define CC_PATH_NODE_LINKAGE_IS_ENUMERATOR(pnle) ( ( CC_PNLE_None <= (pnle) ) && ( (pnle) <= CC_PNLE_Alt ) ) // <!> Keep in-sync with CcPathNodeLinkageEnum.
 
-#define CC_PATH_NODE_LINKAGE_IS_VALID(pnle) ( ( CC_PNLE_None < (pnle) ) && ( (pnle) <= CC_PNLE_Sub ) ) // <!> Keep in-sync with CcPathNodeLinkageEnum.
+#define CC_PATH_NODE_LINKAGE_IS_VALID(pnle) ( ( CC_PNLE_None < (pnle) ) && ( (pnle) <= CC_PNLE_Alt ) ) // <!> Keep in-sync with CcPathNodeLinkageEnum.
 
 #define CC_MAX_LEN_PATH_NODE_LINKAGE_STRING (4)
 
@@ -57,6 +62,8 @@ typedef enum CcPathNodeLinkageEnum {
 char const * cc_path_node_linkage_as_string( CcPathNodeLinkageEnum pnle );
 
 CcPathNodeLinkageEnum cc_path_node_linkage( CcPathNode * path_node );
+
+CcMaybeBoolEnum cc_path_node_apply_parent( CcPathNode * path_node );
 
 char const * cc_path_node_linkage_to_string( CcPathNode * path_node );
 
@@ -74,10 +81,6 @@ CcPathNode * cc_path_node_add_forks( CcPathNode ** pn_step__a,
 CcPathNode * cc_path_node_add_alters( CcPathNode ** pn_step__a,
                                       CcPathNode ** pn_alt__n );
 
-// static CcMaybeBoolEnum _cc_path_node_subs_is_valid( CcPathNode * pn_subs );
-CcPathNode * cc_path_node_add_subs( CcPathNode ** pn_step__a,
-                                    CcPathNode ** pn_sub__n );
-
 CcSideEffect * cc_path_node_last_step_side_effect( CcPathNode * path_node );
 
 CcMaybeBoolEnum cc_path_node_last_step_side_effect_is_valid( CcPathNode * path_node,
@@ -87,13 +90,21 @@ CcMaybeBoolEnum cc_path_node_is_leaf( CcPathNode * path_node );
 
 CcMaybeBoolEnum cc_path_node_is_root( CcPathNode * path_node );
 
-// bool _cc_path_node_set_all_visited( CcPathNode * path_node__io, bool visited );
-bool cc_path_node_set_all_visited( CcPathNode * path_tree__io, bool visited );
+// static bool _cc_path_node_set_all_flags( CcPathNode * path_node__io, bool visited, bool emitted );
+bool cc_path_node_set_all_flags( CcPathNode * path_tree__io,
+                                 bool visited,
+                                 bool emitted );
 
-// TODO :: DOCS
+#define CC_PATH_NODE_RESET_ALL_FLAGS(path_tree__io) ( cc_path_node_set_all_flags( path_tree__io, false, false ) )
+
 bool cc_path_node_iter_init( CcPathNode ** path_node__io );
 
-// TODO :: DOCS
+CcMaybeBoolEnum cc_path_node_subflags_are_all_set( CcPathNode * path_node, bool check_yielded );
+
+#define CC_PATH_NODE_ALL_SUBNODES_ARE_VISITED(path_node) ( cc_path_node_subflags_are_all_set( (path_node), false ) )
+
+#define CC_PATH_NODE_ALL_SUBNODES_ARE_YIELDED(path_node) ( cc_path_node_subflags_are_all_set( (path_node), true ) )
+
 CcMaybeBoolEnum cc_path_node_iter_next( CcPathNode ** path_node__io );
 
 // static bool _cc_path_node_steps_are_valid( CcStep * steps );
@@ -125,6 +136,9 @@ typedef struct CcPathLink {
 
 CcPathLink * cc_path_link__new( CcPathNode * path_node );
 
+CcPathLink * cc_path_link_prepend( CcPathLink ** path_link__iod_a,
+                                   CcPathNode * path_node );
+
 CcPathLink * cc_path_link_append( CcPathLink ** path_link__iod_a,
                                   CcPathNode * path_node );
 
@@ -133,20 +147,15 @@ CcPathLink * cc_path_link_duplicate_all__new( CcPathLink * path_link );
 CcPathLink * cc_path_link_extend( CcPathLink ** path_link__iod_a,
                                   CcPathLink ** path_link__n );
 
+bool cc_path_link_from_nodes( CcPathNode * path_node,
+                              CcPathLink ** path_link__o_a );
+
+bool cc_path_link_to_steps( CcPathLink * path_link,
+                            CcStep ** steps__o_a );
+
 bool cc_path_link_free_all( CcPathLink ** path_link__f );
 
 size_t cc_path_link_len( CcPathLink * path_link );
-
-//
-// Path tree iterator.
-
-// static bool _cc_path_node_walk_to_leaf( CcPathNode * path_node,
-//                                         CcPathLink ** root_to_leaf__iod );
-// static bool _cc_path_node_iter_to_leaf( CcPathNode * path_node,
-//                                         CcPathLink ** root_to_leaf__iod );
-// TODO :: DOCS
-bool cc_path_node_iter_to_leaf( CcPathNode * path_node,
-                                CcPathLink ** root_to_leaf__iod );
 
 //
 // Linked path side-effects.

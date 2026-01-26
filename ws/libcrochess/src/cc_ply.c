@@ -77,7 +77,7 @@ CcPly * cc_ply_duplicate_all__new( CcPly * plies ) {
     CcPly * from = plies;
 
     do {
-        CcStep * steps__t = cc_step_duplicate_all__new( from->steps );
+        CcStep * steps__t = cc_step_duplicate_all__new( from->steps, false );
         if ( !steps__t ) {
             cc_ply_free_all( &ply__a );
             return NULL;
@@ -228,7 +228,7 @@ char * cc_ply_all_to_string__new( CcPly * plies ) {
 
     while ( p_count ) {
         ++count_plies;
-        count_steps += cc_step_count( p_count->steps );
+        count_steps += cc_step_count( p_count->steps, false );
 
         p_count = p_count->next;
     }
